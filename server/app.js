@@ -5,7 +5,7 @@ const path = require('path')
 
 const app = express()
 
-app.use(express.static(__dirname + 'public'));
+app.use(express.static(path.join(__dirname, 'public')));
 app.use(cors());
 app.use(express.json());
 const port = 3032;
@@ -29,7 +29,7 @@ app.get('/', (req, res) => {
 app.post('/login', (req, res) => {
     const { email, password } = req.body;
     console.log(`Email: ${email}, Password: ${password}`)
-    
+
     const query = 'SELECT * FROM employees WHERE email = ? AND password = ?';
     
     connection.query(query, [email, password], (err, results) => {
