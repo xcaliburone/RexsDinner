@@ -1,0 +1,46 @@
+#root {
+  max-width: 1280px;
+  margin: 0 auto;
+  /* padding: 2rem; */
+  /* text-align: center; */
+}
+
+.logo {
+  height: 5em;
+  will-change: filter;
+  transition: filter 300ms;
+  position: relative;
+  z-index: 90;
+  bottom: -65px;
+  left: -15px;
+}
+
+.logo:hover {
+  filter: drop-shadow(0 0 2em #64f07eaa);
+}
+
+form {
+  width: 600px;
+  height: 380px;
+  margin-top: -82px;
+  margin-left: -68px;
+  background-color: #353535;
+  padding: 7%;
+  border-radius: 16px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+}
+
+form input {
+  height: 36px;
+  width: 90%;
+  border-radius: 5px;
+  padding: 3px 12px;
+}
+
+form input:focus {
+  outline: none;
+}
