@@ -39,9 +39,9 @@ function Login() {
             <form onSubmit={handleLogin}>
                 <h1>Admin Login</h1>
                 <label htmlFor="email">Email</label>
-                <input type="text" id='email' value={email} onChange={(e) => setEmail(e.target.value)} />
+                <input type="text" id='email' value={email} onChange={(e) => setEmail(e.target.value)} autoComplete='email' />
                 <label htmlFor="password">Password</label>
-                <input type="text" id='password' value={password} onChange={(e) => setPassword(e.target.value)} />
+                <input type="text" id='password' value={password} onChange={(e) => setPassword(e.target.value)} autoComplete='password' />
 
                 <button type='submit'>login</button>
             </form>
