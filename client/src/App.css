@@ -44,3 +44,11 @@ form input {
 form input:focus {
   outline: none;
 }
+
+.card {
+  width: 1080px;
+  height: 700px;
+  background-color: cadetblue;
+  border-radius : 12px;
+  padding: 26px;
+}
