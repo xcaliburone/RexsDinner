@@ -46,6 +46,45 @@ app.post('/login', (req, res) => {
     });
 });
 
+app.post('/createOrder', (req, res) => {
+    const { customer_id, employee_id, status, total_price, order_details } = req.body;
+    
+    connection.beginTransaction((err) => {
+        if (err) throw err;
+
+        const orderQuery = 'INSERT INTO orders (customer_id, employee_id, `Order Time`, status, `Total Price`) VALUES (?, ?, NOW(), ?, ?)';
+        connection.query(orderQuery, [customer_id, employee_id, status, total_price], (err, result) => {
+            if (err) {
+                return connection.rollback(() => {
+                    throw err;
+                });
+            }
+
+            const orderId = result.insertId;
+            const orderDetailsQuery = 'INSERT INTO order_details (order_id, menu_id, quantity, price) VALUES ?';
+            const orderDetailsValues = order_details.map(detail => [orderId, detail.menu_id, detail.quantity, detail.price]);
+
+            connection.query(orderDetailsQuery, [orderDetailsValues], (err, result) => {
+                if (err) {
+                    return connection.rollback(() => {
+                        throw err;
+                    });
+                }
+
+                connection.commit((err) => {
+                    if (err) {
+                        return connection.rollback(() => {
+                            throw err;
+                        });
+                    }
+
+                    res.send({ success: true, message: 'Order created successfully' });
+                });
+            });
+        });
+    });
+});
+
 app.listen(port, () => {
     console.log(`Server is running at http://localhost:${port}`);
 });
