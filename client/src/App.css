@@ -5,29 +5,29 @@
 body {
     overflow: hidden;
     width: 100vw;
-    background-color: rebeccapurple;
+    /* background-color: rebeccapurple; */
     padding-top: 14px;
 }
 
 .logo {
-    height: 5em;
+    height: 6em;
     will-change: filter;
     transition: filter 300ms;
     position: relative;
     z-index: 90;
-    bottom: -65px;
-    left: -15px;
+    bottom: -85px;
+    left: 480px;
 }
 
 .logo:hover {
     filter: drop-shadow(0 0 2em #64f07eaa);
 }
 
-form {
+.loginForm {
     width: 600px;
     height: 380px;
-    margin-top: -82px;
-    margin-left: -68px;
+    margin-top: -78px;
+    margin-left: 400px;
     background-color: #353535;
     padding: 7%;
     border-radius: 16px;
@@ -38,18 +38,18 @@ form {
     gap: 10px;
 }
 
-form input {
+.loginForm input {
     height: 36px;
     width: 90%;
     border-radius: 5px;
     padding: 3px 12px;
 }
 
-form label {
+.loginForm label {
     width: 90%;
 }
 
-form input:focus {
+.loginForm input:focus {
     outline: none;
 }
 
@@ -63,12 +63,6 @@ form input:focus {
     position: absolute;
     top: 18px;
     right: 13px;
-}
-
-.dashboard {
-    display: flex;
-    gap: 25px;
-    flex-direction: column;
 }
 
 .sideBar {
@@ -101,6 +95,21 @@ form input:focus {
     background-color: bisque;
     border-radius: 12px;
     padding: 10px 20px;
+    margin: 5px 0;
+    cursor: pointer;
+    border: 4px solid #ccc;
+    text-align: center;
+}
+
+.sideButton.active {
+    background-color: #4CAF50;
+    color: white;
+}
+
+.dashboard {
+    display: flex;
+    gap: 25px;
+    flex-direction: column;
 }
 
 .orderTemplate {
@@ -110,6 +119,11 @@ form input:focus {
     background-color: cadetblue;
     border-radius : 12px;
     padding: 26px;
+    /* display: none; */
     display: flex;
     flex-direction: column;
 }
+/* 
+.orderTemplate.active {
+    display: block;
+} */
