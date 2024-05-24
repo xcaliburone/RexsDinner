@@ -127,3 +127,37 @@ body {
 .orderTemplate.active {
     display: block;
 } */
+
+.bungkus {
+    display: flex;
+    flex-direction: row;
+    gap: 15px;
+    color: #353535;
+    font-weight: 600;
+}
+
+.menus {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.menusItem {
+    background-color: #4CAF50;
+    padding: 8px 16px;
+    border-radius: 11px;
+    width: 200px;
+}
+
+.ingredients {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.ingredientsItem {
+    background-color: #4CAF50;
+    padding: 8px 16px;
+    border-radius: 11px;
+    width: 200px;
+}
