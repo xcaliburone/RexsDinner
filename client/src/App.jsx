@@ -7,7 +7,6 @@ import { BrowserRouter as Router, Route, Routes, useNavigate } from 'react-route
 function Login() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
-    // const [message, setMessage] = useState('');
     const navigate = useNavigate();
 
     const handleLogin = async (e) => {
@@ -25,10 +24,8 @@ function Login() {
 
         const data = await response.json();
         if (data.success) {
-            // window.location.href = '/dashboard';
             navigate('/dashboard');
         } else {
-            // setMessage(data.message);
             alert(data.message);
         }
     }
