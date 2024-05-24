@@ -104,23 +104,25 @@ function Dashboard() {
                     {activeTab === 'orderCreate' && (
                         <div className="orderTemplate orderCreate">
                             <h2>Create Order</h2>
-                            <form onSubmit={(e) => {
-                                e.preventDefault();
-                                createOrder();
-                            }}>
+                            <form className='orderForm' onSubmit={(e) => { e.preventDefault(); createOrder(); }}>
                                 <label>Employee ID:</label>
                                 <input type="text" name="employee_id" readOnly value={employeeId} />
+
                                 <label>Customer Name:</label>
                                 <input type="text" name="customer_name" value={customerName} onChange={(e) => setCustomerName(e.target.value)} />
+
                                 <label>Customer ID:</label>
                                 <input type="text" name="customer_id" value={customerId} onChange={(e) => setCustomerId(e.target.value)} />
+
                                 <label>Order Time:</label>
                                 <input type="text" name="order_time" readOnly value={ new Date().toLocaleString()} />
+
                                 <label>Status:</label>
                                 <select name="status" value={status} onChange={(e) => setStatus(e.target.value)}>
                                     <option value="dine in">Dine In</option>
                                     <option value="take away">Take Away</option>
                                 </select>
+
                                 <label>Menu:</label>
                                 <div>
                                     {menus.map(menu => (
@@ -162,22 +164,28 @@ function Dashboard() {
                     {activeTab === 'menus' && (
                         <div className="orderTemplate menus">
                             <h2>Menu</h2>
-                            {menus.map(menu => (
-                                <div key={menu.id}>
-                                    <p>{menu.name} - ${menu.price}</p>
-                                </div>
-                            ))}
+                            <div className='bungkus'>
+                                {menus.map(menu => (
+                                    <div className='menusItem' key={menu.id}>
+                                        <p>Name : {menu.name}</p>
+                                        <p>Price : Rp.{menu.price}</p>
+                                    </div>
+                                ))}
+                            </div>
                         </div>   
                     )}
 
                     {activeTab === 'ingredients' && (
                         <div className="orderTemplate ingredients">
                             <h2>Ingredients</h2>
-                            {allIngredients.map(ingredient => (
-                                <div key={ingredient.id}>
-                                    <p>{ingredient.name} - Stock: {ingredient.stock}</p>
-                                </div>
-                            ))}
+                            <div className="bungkus">
+                                {allIngredients.map(ingredient => (
+                                    <div className='ingredientsItem' key={ingredient.id}>
+                                        <p>Name : {ingredient.name}</p>
+                                        <p>Stock : {ingredient.stock} pcs</p>
+                                    </div>
+                                ))}
+                            </div>
                         </div>                    
                     )}
                 </div>
