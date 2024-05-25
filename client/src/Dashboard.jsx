@@ -4,15 +4,14 @@ import axios from 'axios';
 import { format } from 'date-fns';
 
 function Dashboard() {
+
     const { employeeId } = useParams();
     const [activeTab, setActiveTab] = useState('orderCreate');
     const [menus, setMenus] = useState([]);
     const [orders, setOrders] = useState([]);
     const [orderDetails, setOrderDetails] = useState([]);
     const [customerName, setCustomerName] = useState('');
-    const [customerId, setCustomerId] = useState('');
     const [status, setStatus] = useState('dine in');
-    const [ingredients, setIngredients] = useState({});
     const [allIngredients, setAllIngredients] = useState([]);
     const [menuQuantities, setMenuQuantities] = useState({});
 
@@ -44,17 +43,16 @@ function Dashboard() {
         setActiveTab(tab);
     };
 
-    const addOrderDetail = (menuId, quantity) => {
-        const menu = menus.find(m => m.id === menuId);
-        if (menu) {
-            setOrderDetails([...orderDetails, { menu_id: menuId, quantity, price: menu.price }]);
-        }
-    };
+    // const addOrderDetail = (menuId, quantity) => {
+    //     const menu = menus.find(m => m.id === menuId);
+    //     if (menu) {
+    //         setOrderDetails([...orderDetails, { menu_id: menuId, quantity, price: menu.price }]);
+    //     }
+    // };
 
     const createOrder = async () => {
         try {
             const response = await axios.post(`http://localhost:3032/create-order/${employeeId}`, {
-                customer_id: customerId,
                 customer_name: customerName,
                 status,
                 items: orderDetails,
@@ -65,7 +63,6 @@ function Dashboard() {
                 // Reset form
                 setOrderDetails([]);
                 setCustomerName('');
-                setCustomerId('');
                 setStatus('dine in');
                 fetchOrders();
             } else {
@@ -76,12 +73,12 @@ function Dashboard() {
         }
     };
 
-    const completeOrder = async (orderId) => {
-        const response = await axios.post('http://localhost:3032/complete-order', { orderId });
-        if (response.data.success) {
-            fetchOrders();
-        }
-    };
+    // const completeOrder = async (orderId) => {
+    //     const response = await axios.post('http://localhost:3032/complete-order', { orderId });
+    //     if (response.data.success) {
+    //         fetchOrders();
+    //     }
+    // };
 
     const updateMenuQuantity = (menuId, quantity) => {
         setMenuQuantities(prevState => ({
@@ -131,11 +128,6 @@ function Dashboard() {
                                 <label>Customer Name:</label>
                                 <input type="text" name="customer_name" value={customerName} onChange={(e) => setCustomerName(e.target.value)} />
 
-                                {/* Buat Customer ID otomatis */}
-                                {/* <label>Customer ID:</label>
-                                <input type="text" name="customer_id" value={customerId} readOnly /> */}
-                                {/* Customer ID otomatis dapat ditambahkan di sini */}
-
                                 <label>Order Time:</label>
                                 <input type="text" name="order_time" readOnly value={new Date().toLocaleString()} />
 
@@ -159,7 +151,7 @@ function Dashboard() {
                         </div>
                     )}
 
-                    {activeTab === 'orderQueue' && (
+                    {/* {activeTab === 'orderQueue' && (
                         <div className="orderTemplate orderQueue">
                             <h2>Order Queue</h2>
                             {orders.map(order => (
@@ -169,9 +161,9 @@ function Dashboard() {
                                 </div>
                             ))}
                         </div>
-                    )}
+                    )} */}
 
-                    {activeTab === 'orderHistory' && (
+                    {/* {activeTab === 'orderHistory' && (
                         <div className="orderTemplate orderHistory">
                             <h2>Order History</h2>
                             {orders.map(order => (
@@ -181,7 +173,7 @@ function Dashboard() {
                                 </div>
                             ))}
                         </div>
-                    )}
+                    )} */}
 
                     {activeTab === 'menus' && (
                         <div className="orderTemplate menus">
