@@ -11,9 +11,9 @@ function Login() {
 
     const handleLogin = async (e) => {
         e.preventDefault();
-
+    
         console.log(`Email: ${email}, Password: ${password}`);
-
+    
         const response = await fetch('http://localhost:3032/login', {
             method: 'POST',
             headers: {
@@ -21,14 +21,16 @@ function Login() {
             },
             body: JSON.stringify({ email, password })
         });
-
+    
         const data = await response.json();
         if (data.success) {
-            navigate('/dashboard');
+            const employeeId = data.employeeId; // Anda perlu mendapatkan employeeId dari respons login
+            navigate(`/dashboard/${employeeId}`);
         } else {
             alert(data.message);
         }
     }
+    
 
     return (
         <>
@@ -51,7 +53,7 @@ function App() {
         <Router>
             <Routes>
                 <Route path="/" element={<Login />} />
-                <Route path="/dashboard" element={<Dashboard />} />
+                <Route path="/dashboard/:employeeId" element={<Dashboard />} />
             </Routes>
         </Router>
     )
