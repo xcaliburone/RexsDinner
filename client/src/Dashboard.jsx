@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import axios from 'axios';
+import { format } from 'date-fns';
 
 function Dashboard() {
-    const { id: employeeId } = useParams();
+    const { employeeId } = useParams();
     const [activeTab, setActiveTab] = useState('orderCreate');
     const [menus, setMenus] = useState([]);
     const [orders, setOrders] = useState([]);
@@ -13,12 +14,16 @@ function Dashboard() {
     const [status, setStatus] = useState('dine in');
     const [ingredients, setIngredients] = useState({});
     const [allIngredients, setAllIngredients] = useState([]);
+    const [menuQuantities, setMenuQuantities] = useState({});
+
+    const orderTime = format(new Date(), 'yyyy-MM-dd HH:mm:ss');
 
     useEffect(() => {
         fetchMenus();
         fetchOrders();
         fetchAllIngredients();
     }, []);
+
 
     const fetchMenus = async () => {
         const response = await axios.get('http://localhost:3032/menus');
@@ -35,11 +40,6 @@ function Dashboard() {
         setAllIngredients(response.data);
     };
 
-    const fetchIngredients = async (menuId) => {
-        const response = await axios.get(`http://localhost:3032/menu-ingredients/${menuId}`);
-        setIngredients((prev) => ({ ...prev, [menuId]: response.data }));
-    };
-
     const handleTabClick = (tab) => {
         setActiveTab(tab);
     };
@@ -52,19 +52,27 @@ function Dashboard() {
     };
 
     const createOrder = async () => {
-        const response = await axios.post('http://localhost:3032/create-order', {
-            customer_id: customerId,
-            employee_id: employeeId, // Mengambil employee_id dari URL
-            status,
-            items: orderDetails
-        });
-
-        if (response.data.success) {
-            setOrderDetails([]);
-            setCustomerName('');
-            setCustomerId('');
-            setStatus('dine in');
-            fetchOrders();
+        try {
+            const response = await axios.post(`http://localhost:3032/create-order/${employeeId}`, {
+                customer_id: customerId,
+                customer_name: customerName,
+                status,
+                items: orderDetails,
+                orderTime
+            });
+    
+            if (response.data.success) {
+                // Reset form
+                setOrderDetails([]);
+                setCustomerName('');
+                setCustomerId('');
+                setStatus('dine in');
+                fetchOrders();
+            } else {
+                alert(response.data.message);
+            }
+        } catch (error) {
+            console.error("Error creating order:", error);
         }
     };
 
@@ -73,6 +81,19 @@ function Dashboard() {
         if (response.data.success) {
             fetchOrders();
         }
+    };
+
+    const updateMenuQuantity = (menuId, quantity) => {
+        setMenuQuantities(prevState => ({
+            ...prevState,
+            [menuId]: quantity
+        }));
+    };
+
+    const handleSubmit = (e) => {
+        e.preventDefault();
+        // Ensure the order details are up-to-date before creating the order
+        createOrder();
     };
 
     return (
@@ -104,31 +125,32 @@ function Dashboard() {
                     {activeTab === 'orderCreate' && (
                         <div className="orderTemplate orderCreate">
                             <h2>Create Order</h2>
-                            <form className='orderForm' onSubmit={(e) => { e.preventDefault(); createOrder(); }}>
-                                <label>Employee ID:</label>
-                                <input type="text" name="employee_id" readOnly value={employeeId} />
-
+                            <form className='orderForm' onSubmit={handleSubmit}>
+                                {/* Hapus Employee ID */}
+                                
                                 <label>Customer Name:</label>
                                 <input type="text" name="customer_name" value={customerName} onChange={(e) => setCustomerName(e.target.value)} />
 
-                                <label>Customer ID:</label>
-                                <input type="text" name="customer_id" value={customerId} onChange={(e) => setCustomerId(e.target.value)} />
+                                {/* Buat Customer ID otomatis */}
+                                {/* <label>Customer ID:</label>
+                                <input type="text" name="customer_id" value={customerId} readOnly /> */}
+                                {/* Customer ID otomatis dapat ditambahkan di sini */}
 
                                 <label>Order Time:</label>
-                                <input type="text" name="order_time" readOnly value={ new Date().toLocaleString()} />
+                                <input type="text" name="order_time" readOnly value={new Date().toLocaleString()} />
 
                                 <label>Status:</label>
-                                <select name="status" value={status} onChange={(e) => setStatus(e.target.value)}>
+                                <select className='statusSelect' name="status" value={status} onChange={(e) => setStatus(e.target.value)}>
                                     <option value="dine in">Dine In</option>
                                     <option value="take away">Take Away</option>
                                 </select>
 
                                 <label>Menu:</label>
-                                <div>
+                                <div className='menuOpt'>
                                     {menus.map(menu => (
-                                        <div key={menu.id}>
-                                            <input type="checkbox" id={`menu-${menu.id}`} onChange={() => addOrderDetail(menu.id, 1)} />
+                                        <div className='menusOptions' key={menu.id}>
                                             <label htmlFor={`menu-${menu.id}`}>{menu.name} - ${menu.price}</label>
+                                            <input type="number" id={`menu-${menu.id}`} min="1" value={menuQuantities[menu.id] || ''} onChange={(e) => updateMenuQuantity(menu.id, parseInt(e.target.value))} />
                                         </div>
                                     ))}
                                 </div>
