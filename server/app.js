@@ -85,144 +85,35 @@ app.get('/menu-ingredients/:menu_id', (req, res) => {
     });
 });
 
-function generateCustomerId() {
-    return new Promise((resolve, reject) => {
-        const sql = "SELECT MAX(id) AS maxId FROM customers";
-        connection.query(sql, (err, result) => {
-            if (err) {
-                reject(err);
-            } else {
-                let maxId = result[0].maxId;
-                if (!maxId) {
-                    maxId = 'CS001';
-                } else {
-                    const numericPart = parseInt(maxId.slice(2), 10) + 1;
-                    maxId = 'CS' + (numericPart < 10 ? '00' : numericPart < 100 ? '0' : '') + numericPart;
-                }
-                resolve(maxId);
-            }
-        });
-    });
-}
-
-// app.post('/create-order/:employeeId', async (req, res) => {
-//     const { status, items } = req.body;
-//     const { employeeId } = req.params;
-//     const orderTime = new Date();
-//     // console.table(employeeId, status, items, orderTime)
-//     console.log("Data yang diterima:", req.body);
-//     console.log("adalah : ", employeeId, status, items, orderTime)
-//     try {
-//         const customer_id = await generateCustomerId(); // Tunggu hingga customer_id dihasilkan
-//         const queryOrder = 'INSERT INTO orders (customer_id, employee_id, `Order Time`, status, `Total Price`) VALUES (?, ?, ?, ?, 0)';
-//         connection.beginTransaction(err => {
-//             if (err) {
-//                 console.error('Error beginning transaction:', err);
-//                 return res.status(500).send('Internal Server Error');
-//             }
-//             connection.query(queryOrder, [customer_id, employeeId, orderTime, status], (err, result) => {
-//                 if (err) {
-//                     console.error('Error inserting order:', err);
-//                     connection.rollback(() => res.status(500).send('Internal Server Error'));
-//                     return;
-//                 }
-//                 const orderId = result.insertId;
-//                 const orderDetailsQuery = 'INSERT INTO order_details (order_id, menu_id, quantity, price) VALUES ?';
-//                 const orderDetails = items.map(item => [orderId, item.menu_id, item.quantity, item.price * item.quantity]);
-
-//                 connection.query(orderDetailsQuery, [orderDetails], err => {
-//                     if (err) {
-//                         console.error('Error inserting order details:', err);
-//                         connection.rollback(() => res.status(500).send('Internal Server Error'));
-//                         return;
-//                     }
-
-//                     const updateTotalPriceQuery = 'UPDATE orders SET total_price = (SELECT SUM(price) FROM order_details WHERE order_id = ?) WHERE id = ?';
-//                     connection.query(updateTotalPriceQuery, [orderId, orderId], err => {
-//                         if (err) {
-//                             console.error('Error updating total price:', err);
-//                             connection.rollback(() => res.status(500).send('Internal Server Error'));
-//                             return;
-//                         }
-
-//                         connection.commit(err => {
-//                             if (err) {
-//                                 console.error('Error committing transaction:', err);
-//                                 connection.rollback(() => res.status(500).send('Internal Server Error'));
-//                                 return;
-//                             }
-
-//                             res.send({ success: true, message: 'Order created successfully' });
-//                         });
-//                     });
-//                 });
-//             });
-//         });
-//     } catch (error) {
-//         console.error('Error generating customer_id:', error);
-//         return res.status(500).send('Internal Server Error');
-//     }
-// });
-
 app.post('/create-order/:employeeId', (req, res) => {
-    const { status, items, customer_id, customer_name } = req.body;
+    const { status, items, customer_name } = req.body;
     const { employeeId } = req.params;
 
     const orderTime = format(new Date(), 'yyyy-MM-dd HH:mm:ss');
 
-    console.log('Received data:', { status, items, customer_id, customer_name, employeeId, orderTime });
+    console.log('Received data:', { status, items, customer_name, employeeId, orderTime });
 
     if (!customer_name || !status || !Array.isArray(items) || items.length === 0) {
         return res.status(400).send('Invalid data provided');
     }
 
     try {
-        // Validasi nilai customer_name
-        if (!customer_name) {
-            return res.status(400).send('Customer name is required');
-        }
-
-        // Periksa apakah customer sudah ada dalam tabel customers
-        const queryCheckCustomer = 'SELECT * FROM customers WHERE id = ?';
-        connection.query(queryCheckCustomer, [customer_id], (err, results) => {
-            if (err) {
-                console.error('Error checking customer:', err);
-                return res.status(500).send('Internal Server Error');
-            }
-
-            if (results.length === 0) {
-                // Jika customer belum ada, tambahkan customer baru ke dalam tabel customers
-                const queryInsertCustomer = 'INSERT INTO customers (id, name) VALUES (?, ?)';
-                connection.query(queryInsertCustomer, [customer_id, customer_name], (err) => {
-                    if (err) {
-                        console.error('Error inserting customer:', err);
-                        return res.status(500).send('Internal Server Error');
-                    }
-
-                    // Lanjutkan dengan langkah-langkah pembuatan pesanan setelah menambahkan customer baru
-                    createOrderAfterCustomerInsert(customer_id, employeeId, orderTime, status, items, res);
-                });
-            } else {
-                // Lanjutkan dengan langkah-langkah pembuatan pesanan jika customer sudah ada
-                createOrderAfterCustomerInsert(customer_id, employeeId, orderTime, status, items, res);
-            }
-        });
+        createOrder(employeeId, orderTime, status, items, customer_name, res);
     } catch (error) {
         console.error('Error creating order:', error);
         return res.status(500).send('Internal Server Error');
     }
 });
 
-// Fungsi untuk membuat pesanan setelah customer ditambahkan ke dalam tabel customers
-const createOrderAfterCustomerInsert = (customer_id, employeeId, orderTime, status, items, res) => {
+const createOrder = (employeeId, orderTime, status, items, customer_name, res) => {
     connection.beginTransaction(err => {
         if (err) {
             console.error('Error starting transaction:', err);
             return res.status(500).send('Internal Server Error');
         }
 
-        const queryOrder = 'INSERT INTO orders (customer_id, employee_id, order_time, status, total_price) VALUES (?, ?, ?, ?, 0)';
-        connection.query(queryOrder, [customer_id, employeeId, orderTime, status], (err, result) => {
+        const queryOrder = 'INSERT INTO orders (employee_id, order_time, status, customer_name, total_price) VALUES (?, ?, ?, ?, 0)';
+        connection.query(queryOrder, [employeeId, orderTime, status, customer_name], (err, result) => {
             if (err) {
                 console.error('Error inserting order:', err);
                 connection.rollback(() => res.status(500).send('Internal Server Error'));
@@ -262,6 +153,7 @@ const createOrderAfterCustomerInsert = (customer_id, employeeId, orderTime, stat
         });
     });
 };
+
 
 app.get('/orders', (req, res) => {
     const query = 'SELECT * FROM orders WHERE status IN ("pending", "in-progress")';
