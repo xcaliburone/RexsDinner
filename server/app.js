@@ -32,7 +32,15 @@ connection.connect((err) => {
     console.log('Connected to MySQL Rex`s Dinner Database');
 });
 
-const { generateOrderId, generateOrderDetailsId } = require('./utils/generateID')
+// const { generateOrderId, generateOrderDetailsId } = require('./utils/generateID')
+const {
+    startTransaction,
+    commitTransaction,
+    rollbackTransaction,
+    createOrder,
+    createOrderDetails,
+    updateTotalPrice
+} = require('./utils/orderTnx')
 
 app.get('/', (req, res) => {
     return res.redirect('/');
@@ -89,9 +97,10 @@ app.get('/menu-ingredients/:menu_id', (req, res) => {
     });
 });
 
-app.post('/create-order/:employeeId', (req, res) => {
+app.post('/create-order/:employeeId', async (req, res) => {
     const { status, items, customer_name } = req.body;
     const { employeeId } = req.params;
+
     const orderTime = format(new Date(), 'yyyy-MM-dd HH:mm:ss');
 
     console.log('Received data:', { status, items, customer_name, employeeId, orderTime });
@@ -100,81 +109,60 @@ app.post('/create-order/:employeeId', (req, res) => {
         return res.status(400).send('Invalid data provided');
     }
 
-    const orderStatus = 'processing';
-
     try {
-        createOrder(employeeId, orderTime, status, orderStatus, items, customer_name, res);
+        await startTransaction();
+
+        const orderId = await createOrder(employeeId, orderTime, status, customer_name);
+
+        await createOrderDetails(orderId, items);
+
+        await updateTotalPrice(orderId);
+
+        await commitTransaction();
+        // setTimeout(async () => {
+        //     try {
+        //         await commitTransaction();
+        //         console.log('Transaction committed after delay');
+
+        //         res.send({ success: true, message: 'Order created successfully' });
+        //     } catch (error) {
+        //         console.error('Error committing transaction after delay:', error);
+        //     }
+        // }, 60000);
+
+        res.send({ success: true, message: 'Order created successfully' });
     } catch (error) {
-        console.error('Error creating order:', error);
+        console.error("Error creating order:", error);
+
+        await rollbackTransaction();
+
         return res.status(500).send('Internal Server Error');
     }
 });
 
-const createOrder = async (employeeId, orderTime, status, orderStatus, items, customer_name, res) => {
-    try {
-        const orderId = await generateOrderId();
-        const orderDetailsId = await generateOrderDetailsId();
-
-        console.log("order id :", orderId);
-        console.log("order details id :", orderDetailsId);
-
-        connection.beginTransaction(async (err) => {
-            if (err) {
-                console.error('Error starting transaction:', err);
-                return res.status(500).send('Internal Server Error');
-            }
-
-            const queryOrder = 'INSERT INTO orders (id, employee_id, customer_name, order_time, status, total_price) VALUES (?, ?, ?, ?, ?, 0, ?)';
-            connection.query(queryOrder, [orderId, employeeId, customer_name, orderTime, status, orderStatus], async (err, result) => {
-                if (err) {
-                    console.error('Error inserting order:', err);
-                    connection.rollback(() => res.status(500).send('Internal Server Error'));
-                    return;
-                }
-
-                const orderDetailsQuery = 'INSERT INTO order_details (id, order_id, menu_id, quantity, price) VALUES ?';
-                const orderDetails = items.map(item => [orderDetailsId, orderId, item.menu_id, item.quantity, item.price * item.quantity]);
-
-                connection.query(orderDetailsQuery, [orderDetails], async (err) => {
-                    if (err) {
-                        console.error('Error inserting order details:', err);
-                        connection.rollback(() => res.status(500).send('Internal Server Error'));
-                        return;
-                    }
-
-                    const updateTotalPriceQuery = 'UPDATE orders SET total_price = (SELECT SUM(price) FROM order_details WHERE order_id = ?) WHERE id = ?';
-                    connection.query(updateTotalPriceQuery, [orderId, orderId], async (err) => {
-                        if (err) {
-                            console.error('Error updating total price:', err);
-                            connection.rollback(() => res.status(500).send('Internal Server Error'));
-                            return;
-                        }
-
-                        // Delay selama 1 menit sebelum menyelesaikan transaksi
-                        setTimeout(() => {
-                            connection.commit(async (err) => {
-                                if (err) {
-                                    console.error('Error committing transaction:', err);
-                                    connection.rollback(() => res.status(500).send('Internal Server Error'));
-                                    return;
-                                }
-
-                                res.send({ success: true, message: 'Order created successfully' });
-                            });
-                        }, 60000); // 1 menit dalam milidetik
-                    });
-                });
-            });
-        });
-    } catch (error) {
-        console.error('Error creating order:', error);
-        return res.status(500).send('Internal Server Error');
-    }
-};
-
-
 app.get('/orders', (req, res) => {
-    const query = 'SELECT * FROM orders';
+    const query = `
+    SELECT o.id as order_id, o.customer_name, o.status, o.order_status, o.order_time as order_time, o.total_price as total_price,
+        GROUP_CONCAT(
+            DISTINCT CONCAT(
+                'Menu: ', m.name,
+                ', Quantity: ', od.quantity,
+                ', Price: ', od.price
+            ) SEPARATOR ' | '
+        ) as menu_items,
+        GROUP_CONCAT(
+            DISTINCT CONCAT(
+                'Ingredient: ', i.name
+            ) SEPARATOR ' | '
+        ) as ingredients
+    FROM orders o
+    JOIN order_details od ON o.id = od.order_id
+    JOIN menus m ON m.id = od.menu_id
+    JOIN menu_ingredients mi ON m.id = mi.menu_id
+    JOIN ingredients i ON mi.ingredient_id = i.id
+    GROUP BY o.id, o.customer_name, o.status, o.order_status, o.order_time, o.total_price
+    ORDER BY o.id;
+    `;
     connection.query(query, (err, results) => {
         if (err) return res.status(500).send(err);
         res.send(results);
