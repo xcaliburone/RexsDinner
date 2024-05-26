@@ -4,7 +4,6 @@ import axios from 'axios';
 import { format } from 'date-fns';
 
 function Dashboard() {
-
     const { employeeId } = useParams();
     const [activeTab, setActiveTab] = useState('orderCreate');
     const [menus, setMenus] = useState([]);
@@ -50,7 +49,7 @@ function Dashboard() {
             console.error('Error fetching orders:', error);
         }
     };
-
+    
     const fetchAllIngredients = async () => {
         try {
             const response = await axios.get('http://localhost:3032/ingredients');
@@ -125,18 +124,9 @@ function Dashboard() {
         }
     };
 
-    // const updateOrderStatus = async (orderId, newOrderStatus) => {
-    //     try {
-    //         const response = await axios.put(`http://localhost:3032/update-order-status/${orderId}`, { order_status: newOrderStatus });
-    //         if (response.data.success) {
-    //             fetchOrders(); // Refresh the orders list
-    //         } else {
-    //             alert(response.data.message);
-    //         }
-    //     } catch (error) {
-    //         console.error("Error updating order status:", error);
-    //     }
-    // };
+    const orderQueue = orders.filter(order => order.order_status === 'processing');
+
+    const orderHistory = orders.filter(order => order.order_status === 'completed');
 
     return (
         <>
@@ -168,7 +158,6 @@ function Dashboard() {
                         <div className="orderTemplate orderCreate">
                             <h2>Create Order</h2>
                             <form className='orderForm' onSubmit={handleSubmit}>
-                                
                                 <label>Customer Name:</label>
                                 <input type="text" name="customer_name" value={customerName} onChange={(e) => setCustomerName(e.target.value)} />
 
@@ -195,51 +184,70 @@ function Dashboard() {
                         </div>
                     )}
 
-                    {/* {activeTab === 'orderQueue' && (
-                        <div className="orderTemplate orderQueue">
-                            <h2>Order Queue</h2>
-                            <div className='bungkus'>
-                                {orders.filter(order => order.order_status === 'processing').map(order => (
-                                    <div className='orderItem' key={order.id}>
-                                        <p>Name : {order.customer_name}</p>
-                                        <p>Order Type: {order.status}</p>
-                                        <p>Status : {order.order_status}</p>
-                                        <button onClick={() => updateOrderStatus(order.id, 'completed')}>Complete Order</button>
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-                    )} */}
-
                     {activeTab === 'orderQueue' && (
                         <div className="orderTemplate orderQueue">
                             <h2>Order Queue</h2>
-                            <div className='bungkus'>
-                                {orders.filter(order => order.order_status === 'processing').map(order => (
-                                    <div className='orderItem' key={order.id}>
-                                        <p>Name : {order.customer_name}</p>
-                                        <p>Order Type: {order.status}</p>
-                                        <p>Status : {order.order_status}</p>
-                                        {/* Tombol untuk menyelesaikan pesanan */}
-                                        <button onClick={() => completeOrder(order.id)}>Complete Order</button>
-                                    </div>
-                                ))}
-                            </div>
+                            <div className='paok'>.</div>
+                            {orderQueue.map(order => (
+                                <div className='orderItem' key={order.order_id}>
+                                    <p>Order ID: {order.order_id}</p>
+                                    <p>Customer Name: {order.customer_name}</p>
+                                    <p>Status: {order.status}</p>
+                                    <p>Order Status: {order.order_status}</p>
+                                    <p>Order Time: {new Date(order.order_time).toLocaleTimeString()} | {new Date(order.order_time).toLocaleDateString()}</p>
+                                    <p>Total Price: ${order.total_price}</p>
+                                    <p>Items:</p>
+                                    <ul>
+                                        {order.menu_items.split(' | ').map((item, index) => (
+                                            <li key={index}>
+                                                {item}
+                                            </li>
+                                        ))}
+                                    </ul>
+                                    <p>Ingredients:</p>
+                                    <ul>
+                                        {order.ingredients.split(' | ').map((ingredient, index) => (
+                                            <li key={index}>
+                                                {ingredient}
+                                            </li>
+                                        ))}
+                                    </ul>
+                                    <button onClick={() => completeOrder(order.order_id)}>Complete Order</button>
+                                </div>
+                            ))}
                         </div>
                     )}
 
                     {activeTab === 'orderHistory' && (
                         <div className="orderTemplate orderHistory">
                             <h2>Order History</h2>
-                            <div className='bungkus'>
-                                {orders.filter(order => order.order_status === 'completed').map(order => (
-                                    <div className='orderItem' key={order.id}>
-                                        <p>Name : {order.customer_name}</p>
-                                        <p>Order Type: {order.status}</p>
-                                        <p>Status : {order.order_status}</p>
-                                    </div>
-                                ))}
-                            </div>
+                            <div className='paok'>.</div>
+                            {orderHistory.map(order => (
+                                <div className='orderItem' key={order.order_id}>
+                                    <p>Order ID: {order.order_id}</p>
+                                    <p>Customer Name: {order.customer_name}</p>
+                                    <p>Status: {order.status}</p>
+                                    <p>Order Status: {order.order_status}</p>
+                                    <p>Order Time: {new Date(order.order_time).toLocaleTimeString()} | {new Date(order.order_time).toLocaleDateString()}</p>
+                                    <p>Total Price: ${order.total_price}</p>
+                                    <p>Items:</p>
+                                    <ul>
+                                        {order.menu_items.split(' | ').map((item, index) => (
+                                            <li key={index}>
+                                                {item}
+                                            </li>
+                                        ))}
+                                    </ul>
+                                    <p>Ingredients:</p>
+                                    <ul>
+                                        {order.ingredients.split(' | ').map((ingredient, index) => (
+                                            <li key={index}>
+                                                {ingredient}
+                                            </li>
+                                        ))}
+                                    </ul>
+                                </div>
+                            ))}
                         </div>
                     )}
 
@@ -260,7 +268,7 @@ function Dashboard() {
                                     </div>
                                 ))}
                             </div>
-                        </div>   
+                        </div>
                     )}
 
                     {activeTab === 'ingredients' && (
@@ -274,7 +282,7 @@ function Dashboard() {
                                     </div>
                                 ))}
                             </div>
-                        </div>                    
+                        </div>
                     )}
                 </div>
             </div>
