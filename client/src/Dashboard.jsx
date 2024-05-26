@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
 import axios from 'axios';
 import { format } from 'date-fns';
@@ -14,56 +14,77 @@ function Dashboard() {
     const [status, setStatus] = useState('dine in');
     const [allIngredients, setAllIngredients] = useState([]);
     const [menuQuantities, setMenuQuantities] = useState({});
+    const [menuIngredients, setMenuIngredients] = useState({});
 
     const orderTime = format(new Date(), 'yyyy-MM-dd HH:mm:ss');
+
+    const fetchMenuIngredients = useCallback(async (menus) => {
+        try {
+            const menuIngredientRequests = menus.map(menu => axios.get(`http://localhost:3032/menu-ingredients/${menu.id}`));
+            const responses = await Promise.all(menuIngredientRequests);
+            const menuIngredientData = responses.reduce((acc, response, index) => {
+                acc[menus[index].id] = response.data;
+                return acc;
+            }, {});
+            setMenuIngredients(menuIngredientData);
+        } catch (error) {
+            console.error('Error fetching menu ingredients:', error);
+        }
+    }, []);
+
+    const fetchMenus = useCallback(async () => {
+        try {
+            const response = await axios.get('http://localhost:3032/menus');
+            setMenus(response.data);
+            fetchMenuIngredients(response.data);
+        } catch (error) {
+            console.error('Error fetching menus:', error);
+        }
+    }, [fetchMenuIngredients]);
+
+    const fetchOrders = async () => {
+        try {
+            const response = await axios.get('http://localhost:3032/orders');
+            setOrders(response.data);
+        } catch (error) {
+            console.error('Error fetching orders:', error);
+        }
+    };
+
+    const fetchAllIngredients = async () => {
+        try {
+            const response = await axios.get('http://localhost:3032/ingredients');
+            setAllIngredients(response.data);
+        } catch (error) {
+            console.error('Error fetching ingredients:', error);
+        }
+    };
 
     useEffect(() => {
         fetchMenus();
         fetchOrders();
         fetchAllIngredients();
-    }, []);
-
-
-    const fetchMenus = async () => {
-        const response = await axios.get('http://localhost:3032/menus');
-        setMenus(response.data);
-    };
-
-    const fetchOrders = async () => {
-        const response = await axios.get('http://localhost:3032/orders');
-        setOrders(response.data);
-    };
-
-    const fetchAllIngredients = async () => {
-        const response = await axios.get('http://localhost:3032/ingredients');
-        setAllIngredients(response.data);
-    };
+    }, [fetchMenus]);
 
     const handleTabClick = (tab) => {
         setActiveTab(tab);
     };
 
-    // const addOrderDetail = (menuId, quantity) => {
-    //     const menu = menus.find(m => m.id === menuId);
-    //     if (menu) {
-    //         setOrderDetails([...orderDetails, { menu_id: menuId, quantity, price: menu.price }]);
-    //     }
-    // };
-
     const createOrder = async () => {
         try {
             const response = await axios.post(`http://localhost:3032/create-order/${employeeId}`, {
                 customer_name: customerName,
-                status,
+                status,  // Set the status as 'dine in' or 'take away'
+                order_status: 'processing',  // Set initial order status as 'processing'
                 items: orderDetails,
                 orderTime
             });
-    
+
             if (response.data.success) {
                 // Reset form
                 setOrderDetails([]);
                 setCustomerName('');
-                setStatus('dine in');
+                setStatus('dine in');  // Reset status to default
                 fetchOrders();
             } else {
                 alert(response.data.message);
@@ -73,25 +94,49 @@ function Dashboard() {
         }
     };
 
-    // const completeOrder = async (orderId) => {
-    //     const response = await axios.post('http://localhost:3032/complete-order', { orderId });
-    //     if (response.data.success) {
-    //         fetchOrders();
-    //     }
-    // };
+    const addOrderDetail = (menuId, quantity) => {
+        const menu = menus.find(m => m.id === menuId);
+        if (menu) {
+            const newOrderDetail = { menu_id: menuId, quantity, price: menu.price };
+            setOrderDetails(prevOrderDetails => [...prevOrderDetails, newOrderDetail]);
+        }
+    };
 
     const updateMenuQuantity = (menuId, quantity) => {
         setMenuQuantities(prevState => ({
             ...prevState,
             [menuId]: quantity
         }));
+
+        addOrderDetail(menuId, quantity);
     };
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        // Ensure the order details are up-to-date before creating the order
         createOrder();
     };
+
+    const completeOrder = async (orderId) => {
+        try {
+            await axios.put(`http://localhost:3032/complete-order/${orderId}`);
+            fetchOrders();
+        } catch (error) {
+            console.error('Error completing order:', error);
+        }
+    };
+
+    // const updateOrderStatus = async (orderId, newOrderStatus) => {
+    //     try {
+    //         const response = await axios.put(`http://localhost:3032/update-order-status/${orderId}`, { order_status: newOrderStatus });
+    //         if (response.data.success) {
+    //             fetchOrders(); // Refresh the orders list
+    //         } else {
+    //             alert(response.data.message);
+    //         }
+    //     } catch (error) {
+    //         console.error("Error updating order status:", error);
+    //     }
+    // };
 
     return (
         <>
@@ -123,7 +168,6 @@ function Dashboard() {
                         <div className="orderTemplate orderCreate">
                             <h2>Create Order</h2>
                             <form className='orderForm' onSubmit={handleSubmit}>
-                                {/* Hapus Employee ID */}
                                 
                                 <label>Customer Name:</label>
                                 <input type="text" name="customer_name" value={customerName} onChange={(e) => setCustomerName(e.target.value)} />
@@ -154,26 +198,50 @@ function Dashboard() {
                     {/* {activeTab === 'orderQueue' && (
                         <div className="orderTemplate orderQueue">
                             <h2>Order Queue</h2>
-                            {orders.map(order => (
-                                <div key={order.id}>
-                                    Order {order.id}
-                                    <button onClick={() => completeOrder(order.id)}>Complete</button>
-                                </div>
-                            ))}
+                            <div className='bungkus'>
+                                {orders.filter(order => order.order_status === 'processing').map(order => (
+                                    <div className='orderItem' key={order.id}>
+                                        <p>Name : {order.customer_name}</p>
+                                        <p>Order Type: {order.status}</p>
+                                        <p>Status : {order.order_status}</p>
+                                        <button onClick={() => updateOrderStatus(order.id, 'completed')}>Complete Order</button>
+                                    </div>
+                                ))}
+                            </div>
                         </div>
                     )} */}
 
-                    {/* {activeTab === 'orderHistory' && (
+                    {activeTab === 'orderQueue' && (
+                        <div className="orderTemplate orderQueue">
+                            <h2>Order Queue</h2>
+                            <div className='bungkus'>
+                                {orders.filter(order => order.order_status === 'processing').map(order => (
+                                    <div className='orderItem' key={order.id}>
+                                        <p>Name : {order.customer_name}</p>
+                                        <p>Order Type: {order.status}</p>
+                                        <p>Status : {order.order_status}</p>
+                                        {/* Tombol untuk menyelesaikan pesanan */}
+                                        <button onClick={() => completeOrder(order.id)}>Complete Order</button>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+
+                    {activeTab === 'orderHistory' && (
                         <div className="orderTemplate orderHistory">
                             <h2>Order History</h2>
-                            {orders.map(order => (
-                                <div key={order.id}>
-                                    <p>Order {order.id}</p>
-                                    <button onClick={() => completeOrder(order.id)}>Complete</button>
-                                </div>
-                            ))}
+                            <div className='bungkus'>
+                                {orders.filter(order => order.order_status === 'completed').map(order => (
+                                    <div className='orderItem' key={order.id}>
+                                        <p>Name : {order.customer_name}</p>
+                                        <p>Order Type: {order.status}</p>
+                                        <p>Status : {order.order_status}</p>
+                                    </div>
+                                ))}
+                            </div>
                         </div>
-                    )} */}
+                    )}
 
                     {activeTab === 'menus' && (
                         <div className="orderTemplate menus">
@@ -183,6 +251,12 @@ function Dashboard() {
                                     <div className='menusItem' key={menu.id}>
                                         <p>Name : {menu.name}</p>
                                         <p>Price : Rp.{menu.price}</p>
+                                        <p>Ingredients</p>
+                                        <ul>
+                                            {menuIngredients[menu.id] && menuIngredients[menu.id].map((ingredient, index) => (
+                                                <li key={index}>{ingredient.quantity} {ingredient.name}</li>
+                                            ))}
+                                        </ul>
                                     </div>
                                 ))}
                             </div>
