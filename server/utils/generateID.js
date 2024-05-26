@@ -38,4 +38,5 @@ function generateOrderDetailsId() {
         });
     });
 }
+
 module.exports = { generateOrderId, generateOrderDetailsId }
