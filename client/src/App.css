@@ -161,6 +161,19 @@ body {
     border-radius: 11px;
     width: 200px;
 }
+
+.orderQueue {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.orderItem {
+    background-color: #4CAF50;
+    padding: 8px 16px;
+    border-radius: 11px;
+    width: 200px;
+}
     
 .orderForm {
     /* width: 600px; */
