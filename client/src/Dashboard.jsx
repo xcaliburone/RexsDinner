@@ -117,7 +117,7 @@ function Dashboard() {
 
     const completeOrder = async (orderId) => {
         try {
-            await axios.put(`http://localhost:3032/complete-order/${orderId}`);
+            await axios.put(`http://localhost:3032/complete-order/${orderId}/${employeeId}`);
             fetchOrders();
         } catch (error) {
             console.error('Error completing order:', error);
