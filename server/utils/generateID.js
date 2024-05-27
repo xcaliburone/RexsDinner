@@ -39,4 +39,23 @@ function generateOrderDetailsId() {
     });
 }
 
-module.exports = { generateOrderId, generateOrderDetailsId }
+function generateStockTransactionsId() {
+    return new Promise((resolve, reject) => {
+        const sql = "SELECT MAX(id) maxId FROM stock_transactions";
+        connection.query(sql, (err, result) => {
+            if (err) {
+                reject(err);
+            } else {
+                let maxId = result[0].maxId;
+                if (!maxId) { maxId = 'ST01';
+                } else {
+                    const numericPart = parseInt(maxId.slice(2), 10) + 1;
+                    maxId = 'ST' + (numericPart < 10 ? '0' : '') + numericPart;
+                }
+                resolve(maxId);
+            }
+        });
+    });
+}
+
+module.exports = { generateOrderId, generateOrderDetailsId, generateStockTransactionsId }
