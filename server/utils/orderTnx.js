@@ -61,11 +61,25 @@ const createOrder = async (employeeId, orderTime, status, customer_name) => {
 
 const createOrderDetails = async (orderId, items) => {
     try {
-        // const orderDetailsId = await generateOrderDetailsId();
-        const orderDetailsQuery = 'INSERT INTO order_details (order_id, menu_id, quantity, price) VALUES ?';
-        // const orderDetails = items.map(item => [orderDetailsId, orderId, item.menu_id, item.quantity, item.price * item.quantity]);
-        const orderDetails = items.map(item => [orderId, item.menu_id, item.quantity, item.price * item.quantity]);
+        // Menginisialisasi objek untuk menyimpan quantity tertinggi untuk setiap menu
+        const maxQuantities = {};
 
+        // Mendapatkan quantity tertinggi untuk setiap menu
+        items.forEach(item => {
+            const { menu_id, quantity } = item;
+            if (!maxQuantities[menu_id] || quantity > maxQuantities[menu_id]) {
+                maxQuantities[menu_id] = quantity;
+            }
+        });
+
+        // Mengonversi objek maxQuantities menjadi array orderDetails yang sesuai dengan struktur yang diharapkan oleh query
+        const orderDetails = Object.entries(maxQuantities).map(([menu_id, quantity]) => {
+            const item = items.find(item => item.menu_id === menu_id);
+            return [orderId, menu_id, quantity, item.price * quantity];
+        });
+
+        // Melakukan query INSERT INTO order_details
+        const orderDetailsQuery = 'INSERT INTO order_details (order_id, menu_id, quantity, price) VALUES ?';
         const result = await new Promise((resolve, reject) => {
             connection.query(orderDetailsQuery, [orderDetails], (err, result) => {
                 if (err) {
@@ -85,7 +99,21 @@ const createOrderDetails = async (orderId, items) => {
 
 const updateTotalPrice = async (orderId) => {
     return new Promise((resolve, reject) => {
-        const updateTotalPriceQuery = 'UPDATE orders SET total_price = (SELECT SUM(price) FROM order_details WHERE order_id = ?) WHERE id = ?';
+        // const updateTotalPriceQuery = 'UPDATE orders SET total_price = (SELECT MAX(price) FROM order_details WHERE order_id = ?) WHERE id = ?';
+        const updateTotalPriceQuery = `
+        UPDATE orders
+        SET total_price = (
+            SELECT SUM(max_price) AS total_price
+            FROM (
+                SELECT MAX(od.quantity * m.price) AS max_price
+                FROM order_details od
+                JOIN menus m ON od.menu_id = m.id
+                WHERE od.order_id = ?
+                GROUP BY od.menu_id
+            ) AS subquery
+        )
+        WHERE id = ?;
+        `;
         connection.query(updateTotalPriceQuery, [orderId, orderId], (err, result) => {
             if (err) {
                 console.error('Error updating total price:', err);
