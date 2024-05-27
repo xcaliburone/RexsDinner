@@ -33,6 +33,7 @@ body {
     margin-top: -78px;
     margin-left: 400px;
     background-color: #353535;
+    /* background-color: #21252b; */
     padding: 7%;
     border-radius: 16px;
     display: flex;
@@ -63,7 +64,7 @@ body {
     display: flex;
     gap: 25px;
     flex-direction: row;
-    background-color: blue;
+    /* background-color: blue; */
     position: absolute;
     top: 18px;
     right: 13px;
@@ -87,7 +88,8 @@ body {
 .sideBarBottom {
     display: flex;
     flex-direction: column;
-    background-color: cadetblue;
+    /* background-color: cadetblue; */
+    background-color: #21252b;;
     row-gap: 10px;
     height: 50%;
     padding: 20px 7px;
@@ -96,12 +98,13 @@ body {
 
 .sideButton {
     height: 60px;
-    background-color: bisque;
+    /* background-color: bisque; */
+    background-color: #03665c;
     border-radius: 12px;
     padding: 10px 20px;
     margin: 5px 0;
     cursor: pointer;
-    border: 4px solid #ccc;
+    border: 4px solid #03665c;
     text-align: center;
 }
 
@@ -120,19 +123,16 @@ body {
     /* position: relative; */
     width: 1200px;
     height: 700px;
-    background-color: cadetblue;
+    /* background-color: cadetblue; */
+    background-color: #21252b;
+    /* background-color: rgb(40, 44, 52); */
     border-radius : 12px;
     padding: 26px;
-    /* display: none; */
     display: flex;
     flex-direction: column;
     overflow-x: hidden;
     overflow-y: scroll;
 }
-/* 
-.orderTemplate.active {
-    display: block;
-} */
 
 .bungkus {
     display: flex;
@@ -140,6 +140,7 @@ body {
     gap: 15px;
     color: #353535;
     font-weight: 600;
+    letter-spacing: 0.3px;
 }
 
 .menus {
@@ -149,7 +150,9 @@ body {
 }
 
 .menusItem {
-    background-color: #4CAF50;
+    /* background-color: #4CAF50; */
+    background-color: #03665c;
+    color: aliceblue;
     padding: 8px 16px;
     border-radius: 11px;
     width: 200px;
@@ -162,7 +165,8 @@ body {
 }
 
 .ingredientsItem {
-    background-color: #4CAF50;
+    /* background-color: #4CAF50; */
+    background-color: rgb(40, 44, 52);
     padding: 8px 16px;
     border-radius: 11px;
     width: 200px;
@@ -183,7 +187,8 @@ body {
 }
 
 .orderItem {
-    background-color: #4CAF50;
+    /* background-color: #4CAF50; */
+    background-color: rgb(40, 44, 52);
     padding: 8px 16px;
     border-radius: 11px;
     width: 1000px;
@@ -192,7 +197,8 @@ body {
 .orderForm {
     /* width: 600px; */
     height: 100%;    
-    background-color: #353535;
+    /* background-color: #353535; */
+    background-color: #21252b;
     /* padding: 7%; */
     border-radius: 16px;
     display: flex;
@@ -256,5 +262,5 @@ body {
 }
 
 .paok {
-    color: cadetblue;
+    color: #353535;
 }
