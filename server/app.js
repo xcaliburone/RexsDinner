@@ -7,7 +7,7 @@ const bodyParser = require('body-parser');
 const app = express()
 const port = 3032;
 const corsOptions = { origin: 'http://localhost:5173', optionsSuccessStatus: 200 };
-
+const { rejects } = require('assert');
 app.use(bodyParser.json());
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(cors());
@@ -19,7 +19,6 @@ const connection = mysql.createConnection({ host: 'localhost', user: 'root', pas
 const { generateOrderId, generateOrderDetailsId } = require('./utils/generateID')
 const { generateStockTransactionsId } = require('./utils/generateID');
 const { startTransaction, commitTransaction, rollbackTransaction, createOrder, createOrderDetails, updateTotalPrice } = require('./utils/orderTnx');
-const { rejects } = require('assert');
 
 app.get('/', (req, res) => { return res.redirect('/'); });
 
@@ -80,19 +79,16 @@ app.get('/orders', (req, res) => {
             ) SEPARATOR ' | ') AS menu_items,
             GROUP_CONCAT( DISTINCT CONCAT(
                 'Ingredient: ', i.name,
-                ', Stock Needed: ', (SELECT SUM(mi.quantity * od2.quantity) FROM order_details od2
-                JOIN menu_ingredients mi ON od2.menu_id = mi.menu_id WHERE od2.order_id = o.id AND mi.ingredient_id = i.id)
+                ', Stock Needed: ', (SELECT SUM(mi.quantity * od2.quantity) FROM order_details od2 JOIN menu_ingredients mi ON od2.menu_id = mi.menu_id 
+                WHERE od2.order_id = o.id AND mi.ingredient_id = i.id)
             ) SEPARATOR ' | ') AS ingredients
-        FROM orders o JOIN order_details od ON o.id = od.order_id JOIN menus m ON m.id = od.menu_id
-        JOIN menu_ingredients mi ON m.id = mi.menu_id JOIN ingredients i ON mi.ingredient_id = i.id
-        GROUP BY o.id, o.customer_name, o.status, o.order_status, o.order_time, o.total_price ORDER BY o.id;
-    `;
-    connection.query(query, (err, results) => { if (err) return res.status(500).send(err); res.send(results); });
+        FROM orders o JOIN order_details od ON o.id = od.order_id JOIN menus m ON m.id = od.menu_id JOIN menu_ingredients mi ON m.id = mi.menu_id
+        JOIN ingredients i ON mi.ingredient_id = i.id GROUP BY o.id, o.customer_name, o.status, o.order_status, o.order_time, o.total_price ORDER BY o.id;
+    `; connection.query(query, (err, results) => { if (err) return res.status(500).send(err); res.send(results); });
 });
 
 app.put('/complete-order/:orderId/:employeeId', async (req, res) => {
     const { orderId, employeeId } = req.params;
-
     try { 
         const orderDetailsQuery = `
             SELECT m.id AS menu_id, od.quantity AS order_quantity, i.id AS ingredient_id, mi.quantity AS ingredient_quantity
@@ -102,11 +98,9 @@ app.put('/complete-order/:orderId/:employeeId', async (req, res) => {
         const orderDetails = await new Promise((resolve, reject) => {
             connection.query(orderDetailsQuery, [orderId], (err, results) => { if (err) reject(err); resolve(results); });
         });
-
         if (!orderDetails.length) { throw new Error('Invalid order details'); }
 
         await startTransaction(); // Mengurangi stok bahan baku yang digunakan dalam satu transaksi
-
         await Promise.all(orderDetails.map(async (detail) => {
             const { ingredient_id, ingredient_quantity, order_quantity } = detail;
             const totalNeeded = ingredient_quantity * order_quantity;
