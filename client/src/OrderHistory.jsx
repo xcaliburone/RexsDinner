@@ -7,6 +7,7 @@ function OrderHistory({ orders }) {
     return (
         <div className="orderTemplate orderHistory">
             <h2>Order History</h2>
+            <div className="paok">.</div>
             {orderHistory.map(order => (
                 <div className='orderItem' key={order.order_id}>
                     <p>Order ID: {order.order_id}</p>
