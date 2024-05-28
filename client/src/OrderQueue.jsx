@@ -7,6 +7,7 @@ function OrderQueue({ orders, completeOrder }) {
     return (
         <div className="orderTemplate orderQueue">
             <h2>Order Queue</h2>
+            <div className="paok">.</div>
             {orderQueue.map(order => (
                 <div className='orderItem' key={order.order_id}>
                     <p>Order ID: {order.order_id}</p>
