@@ -55,7 +55,10 @@ button {
 
 button:hover {
   /* border-color: #646cff; */
-  border-color: #7fc133;
+  /* border-color: #7fc133; */
+  /* border-color: #17a2b8; */
+  background-color: #535bf2;
+  transition: ease-in-out .5s;
 }
 
 button:focus,
