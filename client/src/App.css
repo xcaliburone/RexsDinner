@@ -92,10 +92,12 @@ body {
     background-color: #21252b;;
     row-gap: 10px;
     height: 50%;
-    padding: 20px 7px;
+    padding: 20px 13px;
     border-radius: 12px;
     /* align-items: center; */
     /* justify-content: center; */
+    font-weight: 600;
+    letter-spacing: .5px;
 }
 
 .sideButton {
@@ -127,18 +129,22 @@ body {
 }
 
 .orderTemplate {
-    /* position: relative; */
+    position: relative;
     width: 1200px;
     height: 700px;
+    /* max-height: 700px; */
     /* background-color: cadetblue; */
     background-color: #21252b;
     /* background-color: rgb(40, 44, 52); */
     border-radius : 12px;
-    padding: 26px;
+    padding: 26px 26px;
     display: flex;
     flex-direction: column;
+    /* justify-content: center; */
     overflow-x: hidden;
     overflow-y: scroll;
+    /* margin-bottom: 400px; */
+    gap: 10px;
 }
 
 .bungkus {
@@ -160,9 +166,18 @@ body {
     /* background-color: #4CAF50; */
     background-color: #03665c;
     color: aliceblue;
-    padding: 8px 16px;
+    padding: 11px 16px;
     border-radius: 11px;
     width: 200px;
+    display: flex;
+    flex-direction: column;
+    /* align-items: center; */
+    /* justify-content: center; */
+}
+
+.menusIcon {
+    display: flex;
+    justify-content: center;
 }
 
 .ingredients {
@@ -172,11 +187,12 @@ body {
 }
 
 .ingredientsItem {
-    /* background-color: #4CAF50; */
-    background-color: rgb(40, 44, 52);
+    background-color: #4CAF50;
+    /* background-color: rgb(40, 44, 52); */
     padding: 8px 16px;
     border-radius: 11px;
     width: 200px;
+    color: aliceblue;
 }
 
 .orderQueue {
@@ -191,6 +207,8 @@ body {
     flex-direction: row;
     flex-wrap: wrap;
     gap: 10px;
+    /* background-color: aqua; */
+    /* padding: 10px; */
 }
 
 .orderItem {
