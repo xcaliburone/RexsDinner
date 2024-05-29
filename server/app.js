@@ -111,12 +111,14 @@ app.put('/complete-order/:orderId/:employeeId', async (req, res) => {
             const currentStock = currentStockResult[0]?.stock;
             if (currentStock === undefined) { throw new Error(`Stock for ingredient ${ingredient_id} not found`); }
         
-            console.log(`Updating stock for ingredient ${ingredient_id}:`);
+            console.log(`Ingredients : ${ingredient_id}:`);
             console.log(`Before: ${currentStock} units`);
-            console.log(`Quantity to deduct: ${totalNeeded} units`);
+            console.log(`Quantity : ${totalNeeded} units`);
 
             const newStock = currentStock - totalNeeded; // Hitung stok setelah pengurangan
-            console.log(`After: ${newStock} units`);  
+
+            console.log(`After: ${newStock} units`);
+            console.log(`======================================`);
             const updateStockQuery = `UPDATE ingredients SET stock = ? WHERE id = ?`;
             await new Promise((resolve, reject) => {
                 connection.query(updateStockQuery, [newStock, ingredient_id], (err, results) => { if (err) reject(err); resolve(results); });
