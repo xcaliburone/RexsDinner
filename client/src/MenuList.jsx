@@ -8,14 +8,19 @@ function MenuList({ menus, menuIngredients }) {
             <div className='bungkus'>
                 {menus.map(menu => (
                     <div className='menusItem' key={menu.id}>
-                        <p>Name : {menu.name}</p>
-                        <p>Price : Rp.{menu.price}</p>
-                        <p>Ingredients</p>
-                        <ul>
-                            {menuIngredients[menu.id] && menuIngredients[menu.id].map((ingredient, index) => (
-                                <li key={index}>{ingredient.quantity} {ingredient.name}</li>
-                            ))}
-                        </ul>
+                        <div className='menusIcon'>
+                            <img src={menu.link} alt="menusIcon" />
+                        </div>
+                        <div className="menusDesc">
+                            <p>Name : {menu.name}</p>
+                            <p>Price : Rp.{menu.price}</p>
+                            <p>Ingredients</p>
+                            <ul>
+                                {menuIngredients[menu.id] && menuIngredients[menu.id].map((ingredient, index) => (
+                                    <li key={index}>{ingredient.quantity} {ingredient.name}</li>
+                                ))}
+                            </ul>
+                        </div>
                     </div>
                 ))}
             </div>
@@ -26,8 +31,9 @@ function MenuList({ menus, menuIngredients }) {
 MenuList.propTypes = {
     menus: PropTypes.arrayOf(
         PropTypes.shape({
-            id: PropTypes.number.isRequired,
+            id: PropTypes.string.isRequired, // Perbaiki tipe data id menjadi string
             name: PropTypes.string.isRequired,
+            link: PropTypes.string, // Tambahkan validasi prop untuk link
             price: PropTypes.number.isRequired,
         })
     ).isRequired,
