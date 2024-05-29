@@ -62,10 +62,7 @@ function Dashboard() {
                 customer_name: customerName, status, order_status: 'processing', items: orderDetails, orderTime
             });
             if (response.data.success) { // Reset form
-                setOrderDetails([]);
-                setCustomerName('');
-                setStatus('dine in');
-                fetchOrders();
+                setOrderDetails([]); setCustomerName(''); setStatus('dine in'); fetchOrders();
             } else { alert(response.data.message); }
         } catch (error) { console.error("Error creating order:", error); }
     };
