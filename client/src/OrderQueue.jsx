@@ -42,7 +42,7 @@ function OrderQueue({ orders, completeOrder }) {
 OrderQueue.propTypes = {
     orders: PropTypes.arrayOf(
         PropTypes.shape({
-            order_id: PropTypes.number.isRequired,
+            order_id: PropTypes.string.isRequired,
             customer_name: PropTypes.string.isRequired,
             status: PropTypes.string.isRequired,
             order_status: PropTypes.string.isRequired,
