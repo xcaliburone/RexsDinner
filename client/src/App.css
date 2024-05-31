@@ -9,7 +9,6 @@
 body {
     overflow: hidden;
     width: 100vw;
-    /* background-color: rebeccapurple; */
     padding-top: 14px;
 }
 
@@ -33,7 +32,6 @@ body {
     margin-top: -78px;
     margin-left: 400px;
     background-color: #353535;
-    /* background-color: #21252b; */
     padding: 7%;
     border-radius: 16px;
     display: flex;
@@ -64,7 +62,6 @@ body {
     display: flex;
     gap: 25px;
     flex-direction: row;
-    /* background-color: blue; */
     position: absolute;
     top: 18px;
     right: 13px;
@@ -88,14 +85,11 @@ body {
 .sideBarBottom {
     display: flex;
     flex-direction: column;
-    /* background-color: cadetblue; */
     background-color: #21252b;;
     row-gap: 10px;
     height: 50%;
     padding: 20px 13px;
     border-radius: 12px;
-    /* align-items: center; */
-    /* justify-content: center; */
     font-weight: 600;
     letter-spacing: .5px;
 }
@@ -103,8 +97,6 @@ body {
 .sideButton {
     display: flex;
     height: 60px;
-    /* background-color: bisque; */
-    /* background-color: #03665c; */
     background-color: #17a2b8;
     border-radius: 12px;
     padding: 10px 20px;
@@ -117,7 +109,6 @@ body {
 }
 
 .sideButton.active {
-    /* background-color: #4CAF50; */
     background-color: #03665c;
     color: white;
 }
@@ -132,18 +123,13 @@ body {
     position: relative;
     width: 1200px;
     height: 700px;
-    /* max-height: 700px; */
-    /* background-color: cadetblue; */
     background-color: #21252b;
-    /* background-color: rgb(40, 44, 52); */
     border-radius : 12px;
     padding: 26px 26px;
     display: flex;
     flex-direction: column;
-    /* justify-content: center; */
     overflow-x: hidden;
     overflow-y: scroll;
-    /* margin-bottom: 400px; */
     gap: 10px;
 }
 
@@ -163,16 +149,13 @@ body {
 }
 
 .menusItem {
-    /* background-color: #4CAF50; */
     background-color: #03665c;
     color: aliceblue;
-    padding: 11px 16px;
+    padding: 21px 18px;
     border-radius: 11px;
     width: 200px;
     display: flex;
     flex-direction: column;
-    /* align-items: center; */
-    /* justify-content: center; */
 }
 
 .menusIcon {
@@ -187,12 +170,20 @@ body {
 }
 
 .ingredientsItem {
-    background-color: #4CAF50;
-    /* background-color: rgb(40, 44, 52); */
-    padding: 8px 16px;
+    background-color: #03665c;
+    padding: 20px 19px;
     border-radius: 11px;
     width: 200px;
     color: aliceblue;
+}
+
+.ingredientsIcon {
+    display: flex;
+    justify-content: center;
+}
+
+.ingredientsButton {
+    width: 100%;
 }
 
 .orderQueue {
@@ -207,12 +198,9 @@ body {
     flex-direction: row;
     flex-wrap: wrap;
     gap: 10px;
-    /* background-color: aqua; */
-    /* padding: 10px; */
 }
 
 .orderItem {
-    /* background-color: #4CAF50; */
     background-color: rgb(40, 44, 52);
     padding: 11px 16px;
     border-radius: 11px;
@@ -220,10 +208,8 @@ body {
 }
     
 .orderForm {
-    /* width: 600px; */
     height: 100%;
     background-color: #353535;
-    /* background-color: #21252b; */
     padding: 7%;
     border-radius: 16px;
     display: flex;
@@ -252,7 +238,6 @@ body {
 }
 
 .menuOpt {
-    /* background-color: #4CAF50; */
     width: 90%;
     display: flex;
     flex-direction: column;
@@ -263,7 +248,6 @@ body {
 .menusOptions {
     display: flex;
     flex-direction: row;
-    /* background-color: red; */
     width: 400px;
 }
 
@@ -280,12 +264,47 @@ body {
     width: 150px;
     height: 50px;
     padding: 15px;
-    /* border: none; */
     border-radius: 8px;
     margin-left: -810px;
     margin-bottom: 16px;
 }
 
 .paok {
-    color: #353535;
+    color: #21252b;
+}
+
+/* TERMINATOR *//* TERMINATOR *//* TERMINATOR *//* TERMINATOR *//* TERMINATOR *//* TERMINATOR *//* TERMINATOR *//* TERMINATOR *//* TERMINATOR */
+
+.addIngredientForm {
+    background-color: #03665c;
+    padding: 25px 35px;
+    border-radius: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.addIngredientForm .closeButton {
+    display: none;
+    width: 55px;
+    border-radius: 5px;
+    position: absolute;
+    right: 70px;
+}
+
+.addIngredientForm .additionalStock {
+    margin-right: 15px;
+}
+
+.addIngredientForm label input {
+    background-color: #353535;
+    padding: 10px;
+    height: 15px;
+    margin-top: 10px;
+    border-radius: 8px;
+}
+
+.addIngredientForm label {
+    display: flex;
+    margin-bottom: 10px;
 }
