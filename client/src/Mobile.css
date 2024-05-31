@@ -1,0 +1,14 @@
+@media screen and (max-width: 770px) {
+
+    .orderTemplate {
+        position: relative;
+        width: 550px;
+        height: 700px;
+    }
+
+    .sideBar {
+        width: 125px;
+        position: fixed;
+        left: 10px;
+    }
+}
