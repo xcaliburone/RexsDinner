@@ -37,7 +37,7 @@ function OrderCreate({ menus, menuQuantities, customerName, status, setCustomerN
 OrderCreate.propTypes = {
     menus: PropTypes.arrayOf(
         PropTypes.shape({
-            id: PropTypes.number.isRequired,
+            id: PropTypes.string.isRequired,
             name: PropTypes.string.isRequired,
             price: PropTypes.number.isRequired,
         })
