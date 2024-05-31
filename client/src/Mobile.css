@@ -11,4 +11,16 @@
         position: fixed;
         left: 10px;
     }
+
+    .bungkus {
+        display: flex;
+        flex-direction: row;
+        /* flex-direction: column; */
+        flex-wrap: wrap;
+        gap: 15px;
+        color: #353535;
+        font-weight: 600;
+        letter-spacing: 0.3px;
+        /* background-color: red; */
+    }
 }
