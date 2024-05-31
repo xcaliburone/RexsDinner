@@ -12,27 +12,17 @@ function Login() {
 
     const handleLogin = async (e) => {
         e.preventDefault();
-    
         console.log(`Email: ${email}, Password: ${password}`);
-    
         const response = await fetch('http://localhost:3032/login', {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ email, password })
         });
-    
         const data = await response.json();
-        if (data.success) {
-            const employeeId = data.employeeId; // Anda perlu mendapatkan employeeId dari respons login
-            navigate(`/dashboard/${employeeId}`);
-        } else {
-            alert(data.message);
-        }
+        if (data.success) { const employeeId = data.employeeId; navigate(`/dashboard/${employeeId}`);
+        } else { alert(data.message); }
     }
     
-
     return (
         <>
             <img src={viteLogo} className="logo" alt="Rex Logo" />
@@ -42,7 +32,6 @@ function Login() {
                 <input type="text" id='email' value={email} onChange={(e) => setEmail(e.target.value)} autoComplete='email' />
                 <label htmlFor="password">Password</label>
                 <input type="password" id='password' value={password} onChange={(e) => setPassword(e.target.value)} autoComplete='password' />
-
                 <button type='submit'>login</button>
             </form>
         </>

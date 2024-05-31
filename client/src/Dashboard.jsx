@@ -52,7 +52,6 @@ function Dashboard() {
             setAllIngredients(response.data);
         } catch (error) { console.error('Error fetching ingredients:', error); }
     };
-
     useEffect(() => { fetchMenus(); fetchOrders(); fetchAllIngredients(); }, [fetchMenus]);
 
     const handleTabClick = (tab) => { setActiveTab(tab); };
@@ -90,27 +89,22 @@ function Dashboard() {
 
     return (
         <>
-            <div className="orders">
-                <Sidebar activeTab={activeTab} handleTabClick={handleTabClick} />
+        <div className="orders">
+            <Sidebar activeTab={activeTab} handleTabClick={handleTabClick} />
 
-                <div className="dashboard">
-                    {activeTab === 'orderCreate' && (
-                        <OrderCreate menus={menus} menuQuantities={menuQuantities} customerName={customerName} status={status} orderTime={orderTime}
-                            setCustomerName={setCustomerName} setStatus={setStatus} updateMenuQuantity={updateMenuQuantity} handleSubmit={handleSubmit}
-                        />
-                    )}
-
-                    {activeTab === 'orderQueue' && ( <OrderQueue orders={orders} completeOrder={completeOrder} /> )}
-
-                    {activeTab === 'orderHistory' && ( <OrderHistory orders={orders} /> )}
-
-                    {activeTab === 'menus' && ( <MenuList menus={menus} menuIngredients={menuIngredients} /> )}
-
-                    {activeTab === 'ingredients' && ( <IngredientsList allIngredients={allIngredients} /> )}
-                </div>
+            <div className="dashboard">
+                {activeTab === 'orderCreate' && (
+                    <OrderCreate menus={menus} menuQuantities={menuQuantities} customerName={customerName} status={status} orderTime={orderTime}
+                        setCustomerName={setCustomerName} setStatus={setStatus} updateMenuQuantity={updateMenuQuantity} handleSubmit={handleSubmit}
+                    />
+                )}
+                {activeTab === 'orderQueue' && ( <OrderQueue orders={orders} completeOrder={completeOrder} /> )}
+                {activeTab === 'orderHistory' && ( <OrderHistory orders={orders} /> )}
+                {activeTab === 'menus' && ( <MenuList menus={menus} menuIngredients={menuIngredients} /> )}
+                {activeTab === 'ingredients' && ( <IngredientsList allIngredients={allIngredients} setAllIngredients={setAllIngredients} /> )}
             </div>
+        </div>
         </>
     );
 }
-
 export default Dashboard;
