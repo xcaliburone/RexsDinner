@@ -7,23 +7,34 @@ function IngredientsList({ allIngredients, setAllIngredients }) {
     const [selectedIngredient, setSelectedIngredient] = useState(null);
     const [additionalStock, setAdditionalStock] = useState('');
 
-    const handleAddClick = (ingredient) => { setSelectedIngredient(ingredient); setIsAdding(true); };
+    const handleAddClick = (ingredient) => {
+        setSelectedIngredient(ingredient);
+        setIsAdding(true);
+    };
 
-    const handleStockChange = (e) => { setAdditionalStock(e.target.value); };
+    const handleStockChange = (e) => {
+        setAdditionalStock(e.target.value);
+    };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         if (selectedIngredient && additionalStock) {
-            const updatedStock = selectedIngredient.stock + parseInt(additionalStock, 10);
+            const additionalStockValue = parseInt(additionalStock, 10);
             try {
-                await axios.put(`http://localhost:3032/ingredients/${selectedIngredient.id}`, { stock: updatedStock, }); // Kirim perubahan ke server
+                await axios.put(`http://localhost:3032/ingredients/${selectedIngredient.id}`, { stock: additionalStockValue }); // Kirim stok tambahan ke server
                 setAllIngredients(prevIngredients =>
-                    prevIngredients.map(ingredient => ingredient.id === selectedIngredient.id ? { ...ingredient, stock: updatedStock } : ingredient )
+                    prevIngredients.map(ingredient =>
+                        ingredient.id === selectedIngredient.id
+                            ? { ...ingredient, stock: ingredient.stock + additionalStockValue }
+                            : ingredient
+                    )
                 ); // Perbarui state lokal
                 setAdditionalStock('');
                 setIsAdding(false);
                 setSelectedIngredient(null);
-            } catch (error) { console.error('Error updating ingredient stock:', error); }
+            } catch (error) {
+                console.error('Error updating ingredient stock:', error);
+            }
         }
     };
 
@@ -78,4 +89,5 @@ IngredientsList.propTypes = {
     ).isRequired,
     setAllIngredients: PropTypes.func.isRequired,
 };
+
 export default IngredientsList;
