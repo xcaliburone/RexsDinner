@@ -8,9 +8,7 @@ function MenuList({ menus, menuIngredients }) {
             <div className='bungkus'>
                 {menus.map(menu => (
                     <div className='menusItem' key={menu.id}>
-                        <div className='menusIcon'>
-                            <img src={menu.link} alt="menusIcon" />
-                        </div>
+                        <div className='menusIcon'><img src={menu.link} alt="menusIcon" /></div>
                         <div className="menusDesc">
                             <p>Name : {menu.name}</p>
                             <p>Price : Rp.{menu.price}</p>
@@ -31,9 +29,9 @@ function MenuList({ menus, menuIngredients }) {
 MenuList.propTypes = {
     menus: PropTypes.arrayOf(
         PropTypes.shape({
-            id: PropTypes.string.isRequired, // Perbaiki tipe data id menjadi string
+            id: PropTypes.string.isRequired,
             name: PropTypes.string.isRequired,
-            link: PropTypes.string, // Tambahkan validasi prop untuk link
+            link: PropTypes.string,
             price: PropTypes.number.isRequired,
         })
     ).isRequired,
@@ -46,5 +44,4 @@ MenuList.propTypes = {
         )
     ).isRequired,
 };
-
 export default MenuList;
