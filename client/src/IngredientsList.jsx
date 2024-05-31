@@ -26,7 +26,7 @@ function IngredientsList({ allIngredients }) {
 IngredientsList.propTypes = {
     allIngredients: PropTypes.arrayOf(
         PropTypes.shape({
-            id: PropTypes.number.isRequired,
+            id: PropTypes.string.isRequired,
             name: PropTypes.string.isRequired,
             stock: PropTypes.number.isRequired,
         })
