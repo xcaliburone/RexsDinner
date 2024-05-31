@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import viteLogo from '/vite.svg'
 import './App.css'
+import './Mobile.css'
 import Dashboard from '/src/Dashboard';
 import { BrowserRouter as Router, Route, Routes, useNavigate } from 'react-router-dom';
 
