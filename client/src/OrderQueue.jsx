@@ -15,7 +15,7 @@ function OrderQueue({ orders, completeOrder }) {
                     <p>Status: {order.status}</p>
                     <p>Order Status: {order.order_status}</p>
                     <p>Order Time: {new Date(order.order_time).toLocaleTimeString()} | {new Date(order.order_time).toLocaleDateString()}</p>
-                    <p>Total Price: ${order.total_price}</p>
+                    <p>Total Price: Rp. {order.total_price}</p>
                     <p>Items:</p>
                     <ul>
                         {order.menu_items.split(' | ').map((item, index) => (
