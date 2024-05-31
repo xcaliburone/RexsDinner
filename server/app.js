@@ -66,12 +66,13 @@ app.put('/ingredients/:id', (req, res) => {
             if (err) {
                 return connection.rollback(() => {
                     res.status(500).send(err);
-                })
+                });
             }
 
             const currentStock = results[0].stock;
             const newStock = currentStock + additionalStock;
 
+            // Log before updating stock
             console.log(`Current stock for ingredient ${ingredientId}: ${currentStock}`);
             console.log(`Additional stock to add: ${additionalStock}`);
 
@@ -79,23 +80,25 @@ app.put('/ingredients/:id', (req, res) => {
                 if (err) {
                     return connection.rollback(() => {
                         res.status(500).send(err);
-                    })
+                    });
                 }
 
+                // Log after updating stock
                 console.log(`New stock for ingredient ${ingredientId}: ${newStock}`);
+                console.log(`======================================`);
 
                 connection.commit(err => {
                     if (err) {
                         return connection.rollback(() => {
                             res.status(500).send(err);
-                        })
+                        });
                     }
                     res.send({ success: true, newStock });
-                })
-            })
-        })
-    })
-})
+                });
+            });
+        });
+    });
+});
 
 app.get('/menu-ingredients/:menu_id', (req, res) => {
     const { menu_id } = req.params;
