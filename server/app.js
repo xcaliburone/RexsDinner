@@ -43,6 +43,60 @@ app.get('/ingredients', (req, res) => {
     connection.query(query, (err, results) => { if (err) return res.status(500).send(err); res.send(results); });
 });
 
+// app.put('/ingredients/:id', (req, res) => {
+//     const { id } = req.params;
+//     const { stock } = req.body;
+//     const query = 'UPDATE ingredients SET stock = ? WHERE id = ?'; 
+//     connection.query(query, [stock, id], (err, results) => {
+//         if (err) return res.status(500).send(err);
+//         res.send({ success: true, message: 'Stock updated successfully' });
+//     });
+// });
+
+app.put('/ingredients/:id', (req, res) => {
+    const ingredientId = req.params.id;
+    const additionalStock = req.body.stock;
+
+    connection.beginTransaction(err => {
+        if (err) {
+            return res.status(500).send(err);
+        }
+
+        connection.query('SELECT stock FROM ingredients WHERE id = ?', [ingredientId], (err, results) => {
+            if (err) {
+                return connection.rollback(() => {
+                    res.status(500).send(err);
+                })
+            }
+
+            const currentStock = results[0].stock;
+            const newStock = currentStock + additionalStock;
+
+            console.log(`Current stock for ingredient ${ingredientId}: ${currentStock}`);
+            console.log(`Additional stock to add: ${additionalStock}`);
+
+            connection.query('UPDATE ingredients SET stock = ? WHERE id = ?', [newStock, ingredientId], (err, results) => {
+                if (err) {
+                    return connection.rollback(() => {
+                        res.status(500).send(err);
+                    })
+                }
+
+                console.log(`New stock for ingredient ${ingredientId}: ${newStock}`);
+
+                connection.commit(err => {
+                    if (err) {
+                        return connection.rollback(() => {
+                            res.status(500).send(err);
+                        })
+                    }
+                    res.send({ success: true, newStock });
+                })
+            })
+        })
+    })
+})
+
 app.get('/menu-ingredients/:menu_id', (req, res) => {
     const { menu_id } = req.params;
     const query = `SELECT mi.quantity, i.name FROM menu_ingredients mi JOIN ingredients i ON mi.ingredient_id = i.id WHERE mi.menu_id = ?`;
