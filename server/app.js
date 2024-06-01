@@ -9,7 +9,6 @@ const http = require('http');
 
 const app = express();
 const server = http.createServer(app);
-// const io = socketIo(server);
 const io = socketIo(server, {
     cors: {
       origin: "http://localhost:5173",
@@ -17,11 +16,6 @@ const io = socketIo(server, {
     }
 });
 const port = 3032;
-// const corsOptions = {
-//     origin: 'http://localhost:5173',
-//     optionsSuccessStatus: 200 // some legacy browsers (IE11, various SmartTVs) choke on 204
-// };
-// app.use(cors(corsOptions));
 app.use(bodyParser.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
@@ -68,46 +62,24 @@ app.get('/ingredients', (req, res) => {
 app.put('/ingredients/:id', (req, res) => {
     const ingredientId = req.params.id;
     const additionalStock = req.body.stock;
-
     connection.beginTransaction(err => {
-        if (err) {
-            return res.status(500).send(err);
-        }
+        if (err) { return res.status(500).send(err); }
 
         connection.query('SELECT stock FROM ingredients WHERE id = ?', [ingredientId], (err, results) => {
-            if (err) {
-                return connection.rollback(() => {
-                    res.status(500).send(err);
-                });
-            }
-
+            if (err) { return connection.rollback(() => { res.status(500).send(err); }); }
             const currentStock = results[0].stock;
             const newStock = currentStock + additionalStock;
-
-            // Log before updating stock
             console.log(`Current stock for ingredient ${ingredientId}: ${currentStock}`);
             console.log(`Additional stock to add: ${additionalStock}`);
-
             connection.query('UPDATE ingredients SET stock = ? WHERE id = ?', [newStock, ingredientId], (err, results) => {
-                if (err) {
-                    return connection.rollback(() => {
-                        res.status(500).send(err);
-                    });
-                }
+                if (err) { return connection.rollback(() => { res.status(500).send(err); }); }
 
-                // Log after updating stock
                 console.log(`New stock for ingredient ${ingredientId}: ${newStock}`);
                 console.log(`======================================`);
 
                 connection.commit(err => {
-                    if (err) {
-                        return connection.rollback(() => {
-                            res.status(500).send(err);
-                        });
-                    }
+                    if (err) { return connection.rollback(() => { res.status(500).send(err); }); }
                     res.send({ success: true, newStock });
-
-                    // Emit stockUpdated event to all connected clients
                     io.emit('stockUpdated', { ingredientId, newStock });
                 });
             });
@@ -168,49 +140,52 @@ app.put('/complete-order/:orderId/:employeeId', async (req, res) => {
     const { orderId, employeeId } = req.params;
     try {
         const orderDetailsQuery = `
-            SELECT m.id AS menu_id, od.quantity AS order_quantity, i.id AS ingredient_id, mi.quantity AS ingredient_quantity
-            FROM orders o JOIN order_details od ON o.id = od.order_id JOIN menus m ON m.id = od.menu_id
-            JOIN menu_ingredients mi ON m.id = mi.menu_id JOIN ingredients i ON mi.ingredient_id = i.id WHERE o.id = ?
+            SELECT mi.ingredient_id, SUM(mi.quantity * od.quantity) AS total_needed
+            FROM order_details od
+            JOIN menu_ingredients mi ON od.menu_id = mi.menu_id
+            WHERE od.order_id = ?
+            GROUP BY mi.ingredient_id
         `;
         const orderDetails = await new Promise((resolve, reject) => {
             connection.query(orderDetailsQuery, [orderId], (err, results) => { if (err) reject(err); resolve(results); });
         });
         if (!orderDetails.length) { throw new Error('Invalid order details'); }
 
-        await startTransaction(); // Mengurangi stok bahan baku yang digunakan dalam satu transaksi
+        await startTransaction(); // Mulai transaksi
+
         await Promise.all(orderDetails.map(async (detail) => {
-            const { ingredient_id, ingredient_quantity, order_quantity } = detail;
-            const totalNeeded = ingredient_quantity * order_quantity;
-            const currentStockQuery = `SELECT stock FROM ingredients WHERE id = ?`
+            const { ingredient_id, total_needed } = detail;
+
+            const currentStockQuery = `SELECT stock FROM ingredients WHERE id = ?`;
             const currentStockResult = await new Promise((resolve, reject) => {
                 connection.query(currentStockQuery, [ingredient_id], (err, results) => { if (err) reject(err); resolve(results); });
             });
             const currentStock = currentStockResult[0]?.stock;
             if (currentStock === undefined) { throw new Error(`Stock for ingredient ${ingredient_id} not found`); }
-        
-            console.log(`Ingredients : ${ingredient_id}:`);
-            console.log(`Before: ${currentStock} units`);
-            console.log(`Quantity : ${totalNeeded} units`);
 
-            const newStock = currentStock - totalNeeded; // Hitung stok setelah pengurangan
+            console.log(`Ingredient: ${ingredient_id}`);
+            console.log(`Stock Needed: ${total_needed}`);
+            console.log(`Before: ${currentStock} units`);
+            
+            const newStock = currentStock - total_needed;
 
             console.log(`After: ${newStock} units`);
             console.log(`======================================`);
+
             const updateStockQuery = `UPDATE ingredients SET stock = ? WHERE id = ?`;
             await new Promise((resolve, reject) => {
                 connection.query(updateStockQuery, [newStock, ingredient_id], (err, results) => { if (err) reject(err); resolve(results); });
             });
+
+            // Menyimpan transaksi stok ke dalam tabel stock_transactions
+            const transactionTime = new Date().toISOString().slice(0, 19).replace('T', ' ');
+            const stockTransactionValues = [employeeId, orderId, ingredient_id, total_needed, transactionTime, 'remove'];
+            const stockTransactionQuery = `INSERT INTO stock_transactions (employee_id, order_id, ingredient_id, quantity, transaction_time, type) VALUES (?)`;
+            await new Promise((resolve, reject) => {
+                connection.query(stockTransactionQuery, [stockTransactionValues], (err, results) => { if (err) reject(err); resolve(results); });
+            });
         }));
-
-        const transactionTime = new Date().toISOString().slice(0, 19).replace('T', ' '); // Mencatat transaksi stok dalam satu operasi batch
-        const stockTransactionsValues = orderDetails.map(detail => [
-            employeeId, orderId, detail.ingredient_id, detail.ingredient_quantity * detail.order_quantity, transactionTime, 'remove'
-        ]);
-        const stockTransaction = `INSERT INTO stock_transactions (employee_id, order_id, ingredient_id, quantity, transaction_time, type) VALUES ?`;
-        await new Promise((resolve, reject) => {
-            connection.query(stockTransaction, [stockTransactionsValues], (err, results) => { if (err) reject(err); resolve(results); });
-        });
-
+        
         const completeOrderQuery = 'UPDATE orders SET order_status = ? WHERE id = ?';
         await new Promise((resolve, reject) => {
             connection.query(completeOrderQuery, ['completed', orderId], (err, results) => { if (err) reject(err); resolve(results); });
