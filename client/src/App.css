@@ -140,6 +140,7 @@ body {
     color: #353535;
     font-weight: 600;
     letter-spacing: 0.3px;
+    flex-wrap: wrap;
 }
 
 .menus {
@@ -173,13 +174,14 @@ body {
     background-color: #03665c;
     padding: 20px 19px;
     border-radius: 11px;
-    width: 200px;
+    width: 190px;
     color: aliceblue;
 }
 
 .ingredientsIcon {
     display: flex;
     justify-content: center;
+    height: 90px;
 }
 
 .ingredientsButton {
