@@ -1,8 +1,11 @@
-// import React from 'react';
 import PropTypes from 'prop-types';
 
 // function OrderCreate({ menus, menuQuantities, customerName, status, orderTime, setCustomerName, setStatus, updateMenuQuantity, handleSubmit }) {
 function OrderCreate({ menus, menuQuantities, customerName, status, setCustomerName, setStatus, updateMenuQuantity, handleSubmit }) {
+
+    const foodMenus = menus.filter(menu => menu.type === 'food');
+    const drinkMenus = menus.filter(menu => menu.type === 'drink');
+
     return (
         <div className="orderTemplate orderCreate">
             <h2>Create Order</h2>
@@ -20,15 +23,26 @@ function OrderCreate({ menus, menuQuantities, customerName, status, setCustomerN
                 </select>
 
                 <label>Menu:</label>
-                <div className='menuOpt'>
-                    {menus.map(menu => (
-                        <div className='menusOptions' key={menu.id}>
-                            <label htmlFor={`menu-${menu.id}`}>{menu.name} - ${menu.price}</label>
-                            <input type="number" id={`menu-${menu.id}`} min="1" value={menuQuantities[menu.id] || ''} onChange={(e) => updateMenuQuantity(menu.id, parseInt(e.target.value))} />
-                        </div>
-                    ))}
+                <div className="menuOpt">
+                    <div className='menuOpt1'>
+                        {foodMenus.map(menu => (
+                            <div className='menusOptions' key={menu.id}>
+                                <label htmlFor={`menu-${menu.id}`}>{menu.name} - ${menu.price}</label>
+                                <input type="number" id={`menu-${menu.id}`} min="1" value={menuQuantities[menu.id] || ''} onChange={(e) => updateMenuQuantity(menu.id, parseInt(e.target.value))} />
+                            </div>
+                        ))}
+                    </div>
+                    <div className='menuOpt2'>
+                        {drinkMenus.map(menu => (
+                            <div className='menusOptions' key={menu.id}>
+                                <label htmlFor={`menu-${menu.id}`}>{menu.name} - ${menu.price}</label>
+                                <input type="number" id={`menu-${menu.id}`} min="1" value={menuQuantities[menu.id] || ''} onChange={(e) => updateMenuQuantity(menu.id, parseInt(e.target.value))} />
+                            </div>
+                        ))}
+                    </div>
                 </div>
-                <button type="submit">Create Order</button>
+
+                <button type="submit" className='createOrderButton'>Create Order</button>
             </form>
         </div>
     );
@@ -40,6 +54,7 @@ OrderCreate.propTypes = {
             id: PropTypes.string.isRequired,
             name: PropTypes.string.isRequired,
             price: PropTypes.number.isRequired,
+            type: PropTypes.oneOf(['food', 'drink']).isRequired,
         })
     ).isRequired,
     menuQuantities: PropTypes.object.isRequired,
