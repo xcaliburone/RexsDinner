@@ -13,7 +13,7 @@ CREATE TABLE IF NOT EXISTS `employees` (
 CREATE TABLE IF NOT EXISTS `ingredients` (
     `id` VARCHAR(11) NOT NULL, -- IG01
     `name` VARCHAR(32) NOT NULL,
-    `stock` INT(11) DEFAULT 0, -- int unsigned 
+    `stock` INT(11) DEFAULT 0,
     PRIMARY KEY (`id`),
     INDEX `idx_ing_name` (`name`)
 );
