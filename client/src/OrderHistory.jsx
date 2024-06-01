@@ -15,13 +15,9 @@ function OrderHistory({ orders }) {
                     <p>Order Time: {new Date(order.order_time).toLocaleTimeString()} | {new Date(order.order_time).toLocaleDateString()}</p>
                     <p>Total Price: Rp. {order.total_price}</p>
                     <p>Items:</p>
-                    <ul>
-                        {order.menu_items.split(' | ').map((item, index) => ( <li key={index}>{item}</li> ))}
-                    </ul>
+                    <ul>{order.menu_items.split(' | ').map((item, index) => ( <li key={index}>{item}</li> ))}</ul>
                     <p>Ingredients:</p>
-                    <ul>
-                        {order.ingredients.split(' | ').map((ingredient, index) => ( <li key={index}>{ingredient}</li> ))}
-                    </ul>
+                    <ul>{order.ingredients.split(' | ').map((ingredient, index) => ( <li key={index}>{ingredient}</li> ))}</ul>
                 </div>
             ))}
         </div>
