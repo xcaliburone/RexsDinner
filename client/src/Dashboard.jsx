@@ -60,8 +60,7 @@ function Dashboard() {
             const response = await axios.post(`http://localhost:3032/create-order/${employeeId}`, {
                 customer_name: customerName, status, order_status: 'processing', items: orderDetails, orderTime
             });
-            if (response.data.success) { // Reset form
-                setOrderDetails([]); setCustomerName(''); setStatus('dine in'); fetchOrders();
+            if (response.data.success) { setOrderDetails([]); setCustomerName(''); setStatus('dine in'); fetchOrders();
             } else { alert(response.data.message); }
         } catch (error) { console.error("Error creating order:", error); }
     };
@@ -86,7 +85,7 @@ function Dashboard() {
             fetchOrders();
         } catch (error) { console.error('Error completing order:', error); }
     };
-
+    
     return (
         <>
         <div className="orders">
@@ -98,7 +97,7 @@ function Dashboard() {
                         setCustomerName={setCustomerName} setStatus={setStatus} updateMenuQuantity={updateMenuQuantity} handleSubmit={handleSubmit}
                     />
                 )}
-                {activeTab === 'orderQueue' && ( <OrderQueue orders={orders} completeOrder={completeOrder} /> )}
+                {activeTab === 'orderQueue' && ( <OrderQueue orders={orders} completeOrder={completeOrder} fetchStockData={fetchAllIngredients} /> )}
                 {activeTab === 'orderHistory' && ( <OrderHistory orders={orders} /> )}
                 {activeTab === 'menus' && ( <MenuList menus={menus} menuIngredients={menuIngredients} /> )}
                 {activeTab === 'ingredients' && ( <IngredientsList allIngredients={allIngredients} setAllIngredients={setAllIngredients} /> )}
