@@ -1,9 +1,8 @@
 import { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import axios from 'axios';
-import io from 'socket.io-client'; // Import library soket io
-
-const socket = io('http://localhost:3032'); // Sesuaikan URL dengan server Anda
+import io from 'socket.io-client';
+const socket = io('http://localhost:3032');
 
 function IngredientsList({ allIngredients, setAllIngredients }) {
     const [isAdding, setIsAdding] = useState(false);
@@ -15,9 +14,7 @@ function IngredientsList({ allIngredients, setAllIngredients }) {
         setIsAdding(true);
     };
 
-    const handleStockChange = (e) => {
-        setAdditionalStock(e.target.value);
-    };
+    const handleStockChange = (e) => { setAdditionalStock(e.target.value); };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -27,17 +24,13 @@ function IngredientsList({ allIngredients, setAllIngredients }) {
                 await axios.put(`http://localhost:3032/ingredients/${selectedIngredient.id}`, { stock: additionalStockValue });
                 setAllIngredients(prevIngredients =>
                     prevIngredients.map(ingredient =>
-                        ingredient.id === selectedIngredient.id
-                            ? { ...ingredient, stock: ingredient.stock + additionalStockValue }
-                            : ingredient
+                        ingredient.id === selectedIngredient.id ? { ...ingredient, stock: ingredient.stock + additionalStockValue } : ingredient
                     )
                 );
                 setAdditionalStock('');
                 setIsAdding(false);
                 setSelectedIngredient(null);
-            } catch (error) {
-                console.error('Error updating ingredient stock:', error);
-            }
+            } catch (error) { console.error('Error updating ingredient stock:', error); }
         }
     };
 
@@ -48,22 +41,12 @@ function IngredientsList({ allIngredients, setAllIngredients }) {
     };
 
     useEffect(() => {
-        // Tangani peristiwa 'stockUpdated' dari server
         socket.on('stockUpdated', ({ ingredientId, newStock }) => {
-            // Perbarui state allIngredients dengan stok baru
             setAllIngredients(prevIngredients =>
-                prevIngredients.map(ingredient =>
-                    ingredient.id === ingredientId
-                        ? { ...ingredient, stock: newStock }
-                        : ingredient
-                )
+                prevIngredients.map(ingredient => ingredient.id === ingredientId ? { ...ingredient, stock: newStock } : ingredient)
             );
         });
-
-        // Bersihkan listener soket saat komponen tidak lagi digunakan
-        return () => {
-            socket.off('stockUpdated');
-        };
+        return () => { socket.off('stockUpdated'); };
     }, [setAllIngredients]);
 
     return (
@@ -111,5 +94,4 @@ IngredientsList.propTypes = {
     ).isRequired,
     setAllIngredients: PropTypes.func.isRequired,
 };
-
 export default IngredientsList;
