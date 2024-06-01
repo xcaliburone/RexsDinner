@@ -23,4 +23,30 @@
         letter-spacing: 0.3px;
         /* background-color: red; */
     }
+
+    .menuOpt {
+        width: 90%;
+        display: flex;
+        /* background-color: rebeccapurple; */
+        flex-direction: column;
+    }
+
+    .menuOpt2 {
+        margin-left: -10px;
+    }
+
+    .statusSelect {
+        margin-left: -290px;
+    }
+
+    .menusItem {
+        padding: 25px 18px;
+        width: 231px;
+    }
+
+    .ingredientsItem {
+        padding: 25px 19px;
+        width: 135px;
+        font-size: 12px;
+    }
 }
