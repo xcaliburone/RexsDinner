@@ -11,7 +11,7 @@ function MenuList({ menus, menuIngredients }) {
                         <div className='menusIcon'><img src={menu.link} alt="menusIcon" /></div>
                         <div className="menusDesc">
                             <p>Name : {menu.name}</p>
-                            <p>Price : Rp.{menu.price}</p>
+                            <p>Price : Rp. <span>{menu.price}</span></p>
                             <p>Ingredients</p>
                             <ul>
                                 {menuIngredients[menu.id] && menuIngredients[menu.id].map((ingredient, index) => (
