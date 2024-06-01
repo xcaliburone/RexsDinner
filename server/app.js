@@ -1,26 +1,48 @@
-const express = require('express')
-const mysql = require('mysql')
-const cors = require('cors')
-const path = require('path')
+const express = require('express');
+const mysql = require('mysql');
+const cors = require('cors');
+const path = require('path');
 const { format } = require('date-fns');
 const bodyParser = require('body-parser');
-const app = express()
+const socketIo = require('socket.io');
+const http = require('http');
+
+const app = express();
+const server = http.createServer(app);
+// const io = socketIo(server);
+const io = socketIo(server, {
+    cors: {
+      origin: "http://localhost:5173",
+      methods: ["GET", "POST"]
+    }
+});
 const port = 3032;
-const corsOptions = { origin: 'http://localhost:5173', optionsSuccessStatus: 200 };
-const { rejects } = require('assert');
+// const corsOptions = {
+//     origin: 'http://localhost:5173',
+//     optionsSuccessStatus: 200 // some legacy browsers (IE11, various SmartTVs) choke on 204
+// };
+// app.use(cors(corsOptions));
 app.use(bodyParser.json());
 app.use(express.static(path.join(__dirname, 'public')));
-app.use(cors());
-app.use(express.json());
-app.use(cors(corsOptions));
 
-const connection = mysql.createConnection({ host: 'localhost', user: 'root', password: '', database: 'rex dinner'
-}); connection.connect((err) => { if (err) throw err; console.log('Connected to MySQL Rex`s Dinner Database'); });
-const { generateOrderId, generateOrderDetailsId } = require('./utils/generateID')
+
+app.use(express.json());
+app.use(cors());
+
+const connection = mysql.createConnection({ host: 'localhost', user: 'root', password: '', database: 'rex dinner' });
+
+connection.connect((err) => {
+    if (err) throw err;
+    console.log('Connected to MySQL Rex`s Dinner Database');
+});
+
+const { generateOrderId, generateOrderDetailsId } = require('./utils/generateID');
 const { generateStockTransactionsId } = require('./utils/generateID');
 const { startTransaction, commitTransaction, rollbackTransaction, createOrder, createOrderDetails, updateTotalPrice } = require('./utils/orderTnx');
 
-app.get('/', (req, res) => { return res.redirect('/'); });
+app.get('/', (req, res) => {
+    return res.redirect('/');
+});
 
 app.post('/login', (req, res) => {
     const { email, password } = req.body;
@@ -42,16 +64,6 @@ app.get('/ingredients', (req, res) => {
     const query = 'SELECT * FROM ingredients';
     connection.query(query, (err, results) => { if (err) return res.status(500).send(err); res.send(results); });
 });
-
-// app.put('/ingredients/:id', (req, res) => {
-//     const { id } = req.params;
-//     const { stock } = req.body;
-//     const query = 'UPDATE ingredients SET stock = ? WHERE id = ?'; 
-//     connection.query(query, [stock, id], (err, results) => {
-//         if (err) return res.status(500).send(err);
-//         res.send({ success: true, message: 'Stock updated successfully' });
-//     });
-// });
 
 app.put('/ingredients/:id', (req, res) => {
     const ingredientId = req.params.id;
@@ -94,6 +106,9 @@ app.put('/ingredients/:id', (req, res) => {
                         });
                     }
                     res.send({ success: true, newStock });
+
+                    // Emit stockUpdated event to all connected clients
+                    io.emit('stockUpdated', { ingredientId, newStock });
                 });
             });
         });
@@ -119,6 +134,7 @@ app.post('/create-order/:employeeId', async (req, res) => {
         await updateTotalPrice(orderId);
         await commitTransaction();
         res.send({ success: true, message: 'Order created successfully' });
+        io.emit('orderCreated', { orderId, customer_name, status, items });
     } catch (error) {
         console.error("Error creating order:", error);
         await rollbackTransaction();
@@ -141,12 +157,16 @@ app.get('/orders', (req, res) => {
             ) SEPARATOR ' | ') AS ingredients
         FROM orders o JOIN order_details od ON o.id = od.order_id JOIN menus m ON m.id = od.menu_id JOIN menu_ingredients mi ON m.id = mi.menu_id
         JOIN ingredients i ON mi.ingredient_id = i.id GROUP BY o.id, o.customer_name, o.status, o.order_status, o.order_time, o.total_price ORDER BY o.id;
-    `; connection.query(query, (err, results) => { if (err) return res.status(500).send(err); res.send(results); });
+    `;
+    connection.query(query, (err, results) => {
+        if (err) return res.status(500).send(err);
+        res.send(results);
+    });
 });
 
 app.put('/complete-order/:orderId/:employeeId', async (req, res) => {
     const { orderId, employeeId } = req.params;
-    try { 
+    try {
         const orderDetailsQuery = `
             SELECT m.id AS menu_id, od.quantity AS order_quantity, i.id AS ingredient_id, mi.quantity AS ingredient_quantity
             FROM orders o JOIN order_details od ON o.id = od.order_id JOIN menus m ON m.id = od.menu_id
@@ -163,8 +183,8 @@ app.put('/complete-order/:orderId/:employeeId', async (req, res) => {
             const totalNeeded = ingredient_quantity * order_quantity;
             const currentStockQuery = `SELECT stock FROM ingredients WHERE id = ?`
             const currentStockResult = await new Promise((resolve, reject) => {
-                connection.query(currentStockQuery, [ingredient_id], (err, results) => { if(err) reject(err); resolve(results); })
-            })
+                connection.query(currentStockQuery, [ingredient_id], (err, results) => { if (err) reject(err); resolve(results); });
+            });
             const currentStock = currentStockResult[0]?.stock;
             if (currentStock === undefined) { throw new Error(`Stock for ingredient ${ingredient_id} not found`); }
         
@@ -181,7 +201,7 @@ app.put('/complete-order/:orderId/:employeeId', async (req, res) => {
                 connection.query(updateStockQuery, [newStock, ingredient_id], (err, results) => { if (err) reject(err); resolve(results); });
             });
         }));
-        
+
         const transactionTime = new Date().toISOString().slice(0, 19).replace('T', ' '); // Mencatat transaksi stok dalam satu operasi batch
         const stockTransactionsValues = orderDetails.map(detail => [
             employeeId, orderId, detail.ingredient_id, detail.ingredient_quantity * detail.order_quantity, transactionTime, 'remove'
@@ -190,12 +210,16 @@ app.put('/complete-order/:orderId/:employeeId', async (req, res) => {
         await new Promise((resolve, reject) => {
             connection.query(stockTransaction, [stockTransactionsValues], (err, results) => { if (err) reject(err); resolve(results); });
         });
+
         const completeOrderQuery = 'UPDATE orders SET order_status = ? WHERE id = ?';
         await new Promise((resolve, reject) => {
             connection.query(completeOrderQuery, ['completed', orderId], (err, results) => { if (err) reject(err); resolve(results); });
         });
+
         await commitTransaction();
         res.send({ success: true, message: 'Order completed successfully' });
+
+        io.emit('orderCompleted', { orderId });
     } catch (error) {
         console.error('Error completing order:', error);
         await rollbackTransaction();
@@ -203,4 +227,14 @@ app.put('/complete-order/:orderId/:employeeId', async (req, res) => {
     }
 });
 
-app.listen(port, () => { console.log(`Server is running at http://localhost:${port}`); });
+server.listen(port, () => {
+    console.log(`Server is running at http://localhost:${port}`);
+});
+
+io.on('connection', (socket) => {
+    console.log('A user connected');
+
+    socket.on('disconnect', () => {
+        console.log('User disconnected');
+    });
+});
