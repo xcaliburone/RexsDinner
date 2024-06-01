@@ -1,8 +1,12 @@
-// import React from 'react';
 import PropTypes from 'prop-types';
 
-function OrderQueue({ orders, completeOrder }) {
+function OrderQueue({ orders, completeOrder, fetchStockData }) {
     const orderQueue = orders.filter(order => order.order_status === 'processing');
+
+    const handleCompleteOrder = async (orderId) => {
+        await completeOrder(orderId);
+        fetchStockData();
+    };
 
     return (
         <div className="orderTemplate orderQueue">
@@ -17,22 +21,10 @@ function OrderQueue({ orders, completeOrder }) {
                     <p>Order Time: {new Date(order.order_time).toLocaleTimeString()} | {new Date(order.order_time).toLocaleDateString()}</p>
                     <p>Total Price: Rp. {order.total_price}</p>
                     <p>Items:</p>
-                    <ul>
-                        {order.menu_items.split(' | ').map((item, index) => (
-                            <li key={index}>
-                                {item}
-                            </li>
-                        ))}
-                    </ul>
+                    <ul>{order.menu_items.split(' | ').map((item, index) => ( <li key={index}>{item}</li> ))}</ul>
                     <p>Ingredients:</p>
-                    <ul>
-                        {order.ingredients.split(' | ').map((ingredient, index) => (
-                            <li key={index}>
-                                {ingredient}
-                            </li>
-                        ))}
-                    </ul>
-                    <button onClick={() => completeOrder(order.order_id)}>Complete Order</button>
+                    <ul>{order.ingredients.split(' | ').map((ingredient, index) => ( <li key={index}>{ingredient}</li> ))}</ul>
+                    <button onClick={() => handleCompleteOrder(order.order_id)}>Complete Order</button>
                 </div>
             ))}
         </div>
@@ -53,6 +45,6 @@ OrderQueue.propTypes = {
         })
     ).isRequired,
     completeOrder: PropTypes.func.isRequired,
-};
-
+    fetchStockData: PropTypes.func.isRequired,
+}
 export default OrderQueue;
