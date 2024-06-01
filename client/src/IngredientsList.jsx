@@ -1,6 +1,9 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import axios from 'axios';
+import io from 'socket.io-client'; // Import library soket io
+
+const socket = io('http://localhost:3032'); // Sesuaikan URL dengan server Anda
 
 function IngredientsList({ allIngredients, setAllIngredients }) {
     const [isAdding, setIsAdding] = useState(false);
@@ -21,14 +24,14 @@ function IngredientsList({ allIngredients, setAllIngredients }) {
         if (selectedIngredient && additionalStock) {
             const additionalStockValue = parseInt(additionalStock, 10);
             try {
-                await axios.put(`http://localhost:3032/ingredients/${selectedIngredient.id}`, { stock: additionalStockValue }); // Kirim stok tambahan ke server
+                await axios.put(`http://localhost:3032/ingredients/${selectedIngredient.id}`, { stock: additionalStockValue });
                 setAllIngredients(prevIngredients =>
                     prevIngredients.map(ingredient =>
                         ingredient.id === selectedIngredient.id
                             ? { ...ingredient, stock: ingredient.stock + additionalStockValue }
                             : ingredient
                     )
-                ); // Perbarui state lokal
+                );
                 setAdditionalStock('');
                 setIsAdding(false);
                 setSelectedIngredient(null);
@@ -43,6 +46,25 @@ function IngredientsList({ allIngredients, setAllIngredients }) {
         setSelectedIngredient(null);
         setAdditionalStock('');
     };
+
+    useEffect(() => {
+        // Tangani peristiwa 'stockUpdated' dari server
+        socket.on('stockUpdated', ({ ingredientId, newStock }) => {
+            // Perbarui state allIngredients dengan stok baru
+            setAllIngredients(prevIngredients =>
+                prevIngredients.map(ingredient =>
+                    ingredient.id === ingredientId
+                        ? { ...ingredient, stock: newStock }
+                        : ingredient
+                )
+            );
+        });
+
+        // Bersihkan listener soket saat komponen tidak lagi digunakan
+        return () => {
+            socket.off('stockUpdated');
+        };
+    }, [setAllIngredients]);
 
     return (
         <div className="orderTemplate ingredients">
