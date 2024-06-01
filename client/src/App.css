@@ -152,9 +152,9 @@ body {
 .menusItem {
     background-color: #03665c;
     color: aliceblue;
-    padding: 21px 18px;
+    padding: 25px 18px;
     border-radius: 11px;
-    width: 200px;
+    width: 252px;
     display: flex;
     flex-direction: column;
 }
@@ -162,6 +162,13 @@ body {
 .menusIcon {
     display: flex;
     justify-content: center;
+    object-fit: fill;
+}
+
+.menusIcon img {
+    width: 100px;
+    height: 100px;
+    /* object-fit: fill; */
 }
 
 .ingredients {
@@ -172,7 +179,7 @@ body {
 
 .ingredientsItem {
     background-color: #03665c;
-    padding: 20px 19px;
+    padding: 25px 19px;
     border-radius: 11px;
     width: 190px;
     color: aliceblue;
@@ -193,6 +200,11 @@ body {
     flex-direction: row;
     flex-wrap: wrap;
     gap: 10px;
+    letter-spacing: .5px;
+}
+
+.orderQueue button {
+    width: 50%;
 }
 
 .orderHistory {
@@ -200,19 +212,24 @@ body {
     flex-direction: row;
     flex-wrap: wrap;
     gap: 10px;
+    letter-spacing: .5px;
 }
 
 .orderItem {
     background-color: rgb(40, 44, 52);
-    padding: 11px 16px;
+    padding: 15px 31px;
     border-radius: 11px;
-    width: 1000px;
+    width: 1150px;
+}
+
+.orderItem button {
+    width: 100%;
 }
     
 .orderForm {
-    height: 100%;
+    /* height: 100%; */
     background-color: #353535;
-    padding: 7%;
+    padding: 60px 50px 30px 50px;
     border-radius: 16px;
     display: flex;
     flex-direction: column;
@@ -242,9 +259,7 @@ body {
 .menuOpt {
     width: 90%;
     display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: flex-start;
+    /* background-color: rebeccapurple; */
 }
 
 .menusOptions {
@@ -255,7 +270,15 @@ body {
 
 .menusOptions input {
     width: 30px;
-    margin-right: 130px;
+    /* margin-right: 130px; */
+}
+
+.menuOpt1 {
+    margin-left: -10px;
+}
+
+.menuOpt2 {
+    margin-left: 30px;
 }
 
 .menusOptions label {
@@ -273,6 +296,10 @@ body {
 
 .paok {
     color: #21252b;
+}
+
+.createOrderButton {
+    margin-top: 30px;
 }
 
 /* TERMINATOR *//* TERMINATOR *//* TERMINATOR *//* TERMINATOR *//* TERMINATOR *//* TERMINATOR *//* TERMINATOR *//* TERMINATOR *//* TERMINATOR */
