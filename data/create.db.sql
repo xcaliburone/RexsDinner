@@ -13,6 +13,7 @@ CREATE TABLE IF NOT EXISTS `employees` (
 CREATE TABLE IF NOT EXISTS `ingredients` (
     `id` VARCHAR(11) NOT NULL, -- IG01
     `name` VARCHAR(32) NOT NULL,
+    `link` TEXT NOT NULL,
     `stock` INT(11) DEFAULT 0,
     PRIMARY KEY (`id`),
     INDEX `idx_ing_name` (`name`)
@@ -21,7 +22,8 @@ CREATE TABLE IF NOT EXISTS `ingredients` (
 CREATE TABLE IF NOT EXISTS `menus` (
     `id` VARCHAR(11) NOT NULL, -- MN01
     `name` VARCHAR(32) NOT NULL,
-    `link` TEXT NOT NULL, 
+    `link` TEXT NOT NULL,
+    `type` enum('drink','food') NOT NULL,
     `price` DECIMAL(10, 2) NOT NULL,
     PRIMARY KEY (`id`),
     INDEX `idx_mns_name` (`name`)
