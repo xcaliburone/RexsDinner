@@ -52,9 +52,7 @@ CREATE TABLE IF NOT EXISTS `orders` (
     INDEX `idx_orders_cust_name`(`customer_name`),
     INDEX `idx_orders_orderstatus`(`order_status`),
     PRIMARY KEY (`id`),
-    KEY `cust_id_orders` (`customer_id`),
     KEY `emp_id_orders` (`employee_id`),
-    CONSTRAINT `cust_id_orders` FOREIGN KEY (`customer_id`) REFERENCES `customers`(`id`) ON DELETE CASCADE ON UPDATE CASCADE,
     CONSTRAINT `emp_id_orders` FOREIGN KEY (`employee_id`) REFERENCES `employees`(`id`) ON DELETE CASCADE ON UPDATE CASCADE
 );
 
@@ -75,7 +73,7 @@ CREATE TABLE IF NOT EXISTS `stock_transactions` (
     `order_id` VARCHAR(11) NOT NULL,
     `ingredient_id` VARCHAR(11) NOT NULL,
     `quantity` INT(11) NOT NULL,
-    `tansaction_time` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `transaction_time` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     `type` ENUM('add', 'remove') NOT NULL,
     INDEX `idx_stock_transactions_type`(`type`),
     KEY `emp_id_stock_txn` (`employee_id`),
