@@ -8,6 +8,8 @@ import OrderCreate from './OrderCreate';
 import MenuList from './MenuList';
 import IngredientsList from './IngredientsList';
 import Sidebar from './Sidebar';
+import io from 'socket.io-client';
+const socket = io('http://localhost:3032');
 
 function Dashboard() {
     const { employeeId } = useParams();
@@ -83,8 +85,22 @@ function Dashboard() {
         try {
             await axios.put(`http://localhost:3032/complete-order/${orderId}/${employeeId}`);
             fetchOrders();
+            socket.emit('orderCompleted', { orderId });
         } catch (error) { console.error('Error completing order:', error); }
     };
+
+    useEffect(() => {
+        // Listener untuk peristiwa 'orderCompleted'
+        socket.on('orderCompleted', ({ orderId }) => {
+            console.log(`Order ${orderId} has been completed`); // Lakukan sesuatu setelah pesanan selesai
+            fetchOrders(); // Ambil pesanan terbaru setelah pesanan diselesaikan
+        });
+
+        // Cleanup listener saat komponen unmount
+        return () => {
+            socket.off('orderCompleted');
+        };
+    }, []);
     
     return (
         <>
