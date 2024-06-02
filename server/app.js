@@ -23,7 +23,13 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.json());
 app.use(cors());
 
-const connection = mysql.createConnection({ host: 'localhost', user: 'root', password: '', database: 'rex dinner' });
+// const connection = mysql.createConnection({ host: 'localhost', user: 'root', password: '', database: 'rexdinner' });
+const connection = mysql.createConnection({
+    host: process.env.DB_HOST || 'localhost',
+    user: process.env.DB_USER || 'root',
+    password: process.env.DB_PASSWORD || '',
+    database: process.env.DB_NAME || 'rexdinner'
+});
 
 connection.connect((err) => {
     if (err) throw err;
