@@ -1,5 +1,5 @@
 const mysql = require('mysql');
-const connection = mysql.createConnection({ host: 'localhost', user: 'root', password: '', database: 'rex dinner' });
+const connection = mysql.createConnection({ host: 'localhost', user: 'root', password: '', database: 'rexdinner' });
 
 function generateOrderId() {
     return new Promise((resolve, reject) => {
