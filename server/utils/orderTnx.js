@@ -1,5 +1,5 @@
 const mysql = require('mysql');
-const connection = mysql.createConnection({ host: 'localhost', user: 'root', password: '', database: 'rex dinner' });
+const connection = mysql.createConnection({ host: 'localhost', user: 'root', password: '', database: 'rexdinner' });
 
 const { generateOrderId, generateOrderDetailsId } = require('./generateID')
 
